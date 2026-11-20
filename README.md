@@ -1,18 +1,68 @@
-# Full Stack Team1 공동작업규칙
+# Full Stack Team1 공동작업규칙 — 기존 다이어리 원문 보존 및 팀 규칙 통합
 
-작성: @vscodereader(최성원, 팀장) · 기준일: 2026-11-20
+작성: @vscodereader(최성원, 팀장) · 통합일: 2026-11-20
 
-**모든 팀원과 AI는 작업 전에 이 파일 전체를 읽고 따라야 합니다.** 팀원이 AI에 작업을 맡길 때에도 이 파일을 그대로 전달합니다. 규칙을 모른 채 `main`이나 파트 통합 브랜치에 직접 코드를 올리거나 검토 없이 병합하지 않습니다.
+- 팀 조직: https://github.com/Full-Stack-Team1
+- AI 전달 파일: https://github.com/Full-Stack-Team1/.github/blob/main/AGENTS.md
+- `AGENTS.md`, `README.md`, `profile/README.md`는 동일한 내용으로 유지한다.
+- 아래는 기존 다이어리 AGENTS.md 전체를 바탕으로 현재 팀 규칙을 합친 문서다. **0~3·5~9절의 다이어리 이름·경로·스택·운영 주소·과거 상태는 원본 프로젝트의 내용이다.** 블로그 CMS의 폴더나 제품 기능으로 자동 확정하거나 존재하지 않는 상대 링크/명령을 실행하지 않는다. 공통 개발 원칙은 유지하고, 프로젝트 고유 항목은 해당 개발 저장소의 실제 구조·설계와 대조한다. 차이가 있다고 임의로 삭제하지 말고 차이를 보고한다.
+- 4절은 사용자 요청의 팀 구성·브랜치·리뷰·경로별 변경 기록 규칙으로 갱신했다. 10절에 이전 누락 및 추가·변경 내역을 모두 기록했다.
 
-- 팀 조직: [Full-Stack-Team1](https://github.com/Full-Stack-Team1)
-- 기존 개발 저장소: [minseongdeveloper/blog-cms](https://github.com/minseongdeveloper/blog-cms) — 조직으로 이전하기 전까지 사용하며, 조직 내 개발 저장소가 정해지면 이 주소를 갱신합니다.
-- 첫 화면에서 읽기: [조직 첫 화면](https://github.com/Full-Stack-Team1)
-- AI에 전달할 동일한 규칙 파일: [AGENTS.md](https://github.com/Full-Stack-Team1/.github/blob/main/AGENTS.md) — 파일 화면의 **Raw / Download raw file**로 원문을 내려받을 수 있습니다.
-- AGENTS.md, README.md, profile/README.md는 동일한 내용으로 유지합니다. 규칙 수정 시 세 파일을 함께 갱신합니다.
-- 이 문서는 공동개발 절차만 정의합니다. 제품 소스·다이어리 설계서·운영 설정은 포함하지 않습니다.
-- 최초 규칙 게시를 위한 이번 문서 업로드 이후, 실제 기능 개발부터 아래 브랜치·리뷰 절차를 적용합니다. 브랜치 이름과 병합 제한을 문서에 적었다고 실제 GitHub 설정이 생성되는 것은 아닙니다.
+---
 
-## 브랜치·커밋·PR 규칙
+# 로그(다이어리) — 공통 개발 지침
+
+이 저장소에서 일하는 사람과 AI(Claude Code·Codex)가 **가장 먼저 읽는 파일**이다. 이 파일과 아래 폴더별 규칙만 읽으면 이전 대화 없이 같은 방식으로 이어서 일할 수 있어야 한다. 사용자의 새 지시가 이 파일과 다르면 지시를 따르고 이 파일을 함께 고친다.
+
+## 0. 먼저 읽을 것
+
+| 작업 위치 | 규칙 파일 |
+| --- | --- |
+| 전체 공통(이 파일) | `AGENTS.md` (Claude는 `CLAUDE.md` → 이 파일) |
+| 웹 앱(화면·API·테스트) | [apps/web/AGENTS.md](apps/web/AGENTS.md) |
+| 공통 화면 부품·토큰 | [packages/ui/AGENTS.md](packages/ui/AGENTS.md) |
+| 순수 규칙·스키마 | [packages/core/AGENTS.md](packages/core/AGENTS.md) |
+| DB 스키마·마이그레이션 | [packages/db/AGENTS.md](packages/db/AGENTS.md) |
+| 외부 제공처 호출(지도·검색·경로) | [packages/api/AGENTS.md](packages/api/AGENTS.md) |
+| 설계서(todo·finish) | [docs/design/log-diary/AGENTS.md](docs/design/log-diary/AGENTS.md) |
+| 남은 일 / 끝난 일 | [todo/README](docs/design/log-diary/todo/README.md) / [finish/README](docs/design/log-diary/finish/README.md) |
+
+새 규칙 파일은 이 표에 있는 위치에만 둔다. 같은 내용을 여러 파일에 반복하지 않고 링크한다.
+
+## 1. 프로젝트
+
+- 이름: **로그**(Diary Project). GitHub `vscodereader/Diary-Project`(비공개). 로컬 폴더 이름은 `diary`(예: `C:\Users\chois\diary`).
+- **중심은 다이어리다.** 사진 중심으로 하루(날짜) 아래 로그를 쌓고, 고른 사람에게 하루 단위로 VIEW/EDIT 공유한다.
+- 여행 웹앱 **하루길**(`vscodereader/harugil`) 코드를 복사해 시작했다. 하루길 코드는 다이어리를 만들 때 필요한 것을 가져다 쓰는 **재료**일 뿐 주 기능이 아니다(사용자, 2026-11-01). 남아 있는 옛 여행 화면(지도·일정·준비·지출·발자취·캘린더·초대한 사람)을 지울지는 사용자가 정한다. 그 전까지 지우지 않고, 새 작업 시간을 들여 다듬지도 않는다.
+- 웹 우선(PC·노트북), 휴대폰은 같은 웹. `android-app`은 WebView 껍데기다.
+- 로그인: **Google 계정만**. 게스트·카카오·Apple 없음.
+- 만들지 않는 것: 광고·구독·결제·할인·선물·보상·이벤트·친구 초대·출석. 기술적 파일 크기·저장 용량 제한은 만든다.
+- 운영: Vercel 프로젝트 `diary`(https://diary-vert-psi.vercel.app), DB는 Neon PostgreSQL(하루길과 다른 DB). 운영 DB·배포·환경 변수는 프로젝트 주인(vscodereader)이 관리한다.
+
+## 2. 일하는 순서 (모든 기능·수정에 똑같이)
+
+1. **설계서 먼저.** 할 일을 [todo](docs/design/log-diary/todo/README.md)에서 찾거나, 새 요청이면 해당 설계서(00~07) 절에 계약을 적는다. 쓰는 법은 [설계서 규칙](docs/design/log-diary/AGENTS.md).
+   - '제안'·'미정'을 확정처럼 구현하지 않는다. 결정이 필요하면 **구현 전에 사용자에게 묻는다**(질문은 결정에 필요한 것만).
+   - 원본 앱 관찰과 사용자 요구가 다르면 사용자 요구가 우선이다.
+2. **이슈와 브랜치.** 4절 Git 규칙대로 이슈를 만들고 브랜치를 판다.
+3. **구현.** 5절 코드 규칙과 폴더별 규칙을 지킨다. 새 부품을 만들기 전에 기존 공통 부품으로 되는지 먼저 본다.
+4. **테스트 케이스를 같이 넣는다.** 사전 조건·입력·기대 결과, 경계값·실패·권한·저장 후 재조회를 포함한다. 위치와 방법은 [apps/web/AGENTS.md](apps/web/AGENTS.md) "테스트".
+5. **자동 검사:** `pnpm check` → `pnpm test` → (DB를 건드렸으면) `pnpm test:db` → `pnpm build`. 결과 숫자를 그대로 보고한다.
+6. **localhost에서 직접 확인.** 테스트 DB로 개발 서버를 켜고 임시 사용자로 로그인해 **넓은 화면(약 1280px)과 휴대폰 폭(375px) 둘 다** 본다. 방법은 [apps/web/AGENTS.md](apps/web/AGENTS.md) "localhost에서 로그인한 화면 확인". 확인 못 한 것은 못 했다고 쓴다.
+7. **문서 정리.** 끝난 일은 finish(원래 문제 → 수정 → 검증 결과 → 제한), 남은 일만 todo에 둔다.
+8. **커밋·PR.** 4절 형식. 화면이 바뀐 PR은 확인한 폭과 결과를 본문에 쓴다.
+9. **병합·배포**는 리뷰어 승인 뒤. main 병합·운영 DB 마이그레이션·Vercel 배포는 **프로젝트 주인의 지시나 승인**이 있어야 한다.
+
+중간에 임의로 멈추지 않는다. 멈춰야 하면 이유를 말한다. 오래 걸리면 지금 무엇을 하는지 한 줄로 알린다. 시킨 일만 하고, 관련 문제를 발견하면 고치지 말고 알린다.
+
+## 3. 사용자(프로젝트 주인) 선호
+
+- 답은 **한국어**, 짧고 쉬운 말. 전문 용어는 짧게 풀어 쓴다.
+- 사용자가 예상 시간을 자주 묻는다. 범위와 미정 결정을 보고 분 단위로 답한다.
+- 사용자가 "직접 하겠다"고 하면 명령어만 알려 준다(PowerShell 문법: `$env:NAME = "값"; 명령`).
+- 데스크톱·휴대폰이 같은 기능을 보여야 한다.
+
+## 4. Git 규칙 (2026-11-20 팀 공통규칙)
 
 ### 파트와 담당자
 
@@ -174,9 +224,128 @@ Closes #이슈번호
 - `main` 병합과 배포는 위 조건을 충족하고 팀장의 승인까지 받은 뒤 진행한다.
 - 이 절은 팀의 공통 개발규칙이다. GitHub에서 병합을 기술적으로 차단하려면 별도로 브랜치 보호/Ruleset과 필수 승인·대화 해결·검사를 설정해야 한다. 문서 수정만으로 설정이 적용됐다고 간주하지 않는다.
 
+## 5. 코드 규칙 (beyondsoft-kr/moneyroad-app 방식)
+
+- **한 파일에 한 부품.** 파일명은 kebab-case(`date-range.tsx`), 부품 이름은 PascalCase(`DateRange`), 훅은 `use-*.ts`.
+- 모양 차이는 새 부품을 만들지 않고 `variant`·`size` prop이나 CSS 변수로 고른다. 비슷한 부품을 여러 개 만들지 않는다.
+- 여러 화면이 쓰는 부품은 `packages/ui`, 다이어리 전용 조합은 `apps/web/src/components/diary`.
+- **하드코딩 금지:** px·색·z-index·투명도·시간(ms)·간격을 코드나 CSS에 숫자로 쓰지 않는다. `packages/ui/src/tokens.css`·`theme.ts`의 토큰을 쓰고, 없으면 토큰을 추가한다. 코드 속 정책 숫자는 이름 붙은 상수로 둔다. `packages/ui/test/no-hardcoded.test.ts`가 지키며, 이 테스트를 끄거나 예외를 늘려 우회하지 않는다.
+- 쓰지 않는 코드·파일을 남기지 않는다(`noUnusedLocals`). re-export만 하는 묶음 파일(barrel)을 새로 만들지 않는다.
+- import는 `@/` 별칭. `../../..` 깊은 상대경로를 쓰지 않는다.
+- 주석은 '왜'를 짧게. 코드 주석은 영어, 테스트 이름·설명은 한국어(기존 코드와 같은 밀도).
+- 타입은 `any` 대신 `unknown`과 좁히기. 들어오는 JSON은 zod 스키마로 검증한다.
+- 리팩터링·공통화는 **화면이 이전과 똑같아야** 한다. 바꾼 뒤 화면을 비교해 확인한다.
+- 큰 파일을 고칠 때도 주변 코드의 이름·형식·주석 밀도를 따른다.
+
+## 6. 보안·데이터
+
+- `.env*` 값을 출력·커밋하지 않는다. 키 발급 안내는 `apps/web/.env.example`. 제공처 비밀 키는 서버에만 둔다(공개 지도 브라우저 키 예외).
+- 모든 데이터는 DB에만 저장한다. 브라우저 저장소(localStorage 등)·로컬 `data/` 파일 금지. 예외: 로컬 개발의 동작 로그 `active_log/log.YYYY-MM-DD`(git 제외), 운영은 DB `activity_logs`.
+- 운영 DB를 테스트에 쓰지 않는다. 운영 DB에 테스트 사용자를 만들지 않는다. 데이터를 영구 삭제하는 동작은 사용자 확인 후.
+- 실제 응답이 없는 경로·시간·가격은 비워 둔다(지어내지 않는다). 실패한 실제 호출을 데모로 몰래 바꾸지 않는다.
+- Google 경로 선은 Google 지도에서만 그린다.
+- 참고용으로 받은 다른 저장소는 읽기만 하고 설치·실행하지 않는다.
+- Graphify(로컬 도구)를 쓰면 키·`.env*`·개인 사진·DB 내용을 넘기지 않고, `graphify-out/`은 커밋하지 않는다.
+
+## 7. 설치·실행
+
+Node.js 22.14 이상, pnpm 11.3.0, Docker(로컬 테스트 DB). 주 개발 환경은 Windows.
+
+```powershell
+pnpm install --frozen-lockfile   # 설치 뒤 Prisma 클라이언트가 자동 생성된다
+pnpm run setup                   # apps/web/.env.local 생성(키 이름만, SESSION_SECRET 자동)
+# apps/web/.env.example 안내대로 키를 발급해 apps/web/.env.local 에 채운다
+pnpm dev                         # http://localhost:3000
+pnpm check; pnpm test; pnpm build
+pnpm doctor                      # 키가 채워졌는지만 확인(값 출력 없음)
+pnpm dev:user create             # 로컬 테스트 DB에 임시 로그인 사용자(apps/web/AGENTS.md)
+```
+
+- 키가 없어도 화면·테스트·빌드는 돌아간다. 지도·검색·로그인 같은 그 키를 쓰는 기능만 안 된다.
+- 로컬 테스트 DB 준비와 개발 서버를 테스트 DB로 켜는 법: [apps/web/AGENTS.md](apps/web/AGENTS.md).
+- 배포(프로젝트 주인 승인 후): `$env:VERCEL_TELEMETRY_DISABLED = "1"; pnpm dlx vercel@latest deploy --prod --yes --non-interactive`. 운영 DB 마이그레이션: [packages/db/AGENTS.md](packages/db/AGENTS.md).
+
+## 8. 자주 만난 문제와 해결 (트러블슈팅)
+
+| 증상 | 원인 | 해결 |
+| --- | --- | --- |
+| 새로 받은 저장소에서 `pnpm check`가 타입 오류 수백 개 | Prisma 클라이언트가 안 만들어짐 | `pnpm install`(postinstall이 생성) 또는 `pnpm db:generate` |
+| `pnpm build`·설치 중 `EPERM`(Prisma DLL) | Windows에서 개발 서버가 Prisma 엔진 파일을 잡고 있음 | 개발 서버를 끄고 실행 |
+| 빌드 뒤 개발 서버에서 일부 API가 404(HTML) | 남은 `apps/web/.next/dev` | 그 폴더를 지우고 다시 `pnpm dev` |
+| 테스트 DB 접속이 멈춤 | WSL이 IPv6 `localhost:55432`를 잡음 | 주소를 `127.0.0.1:55432`로 |
+| 로컬 화면에서 저장(POST)이 403 | 같은 출처 검사. `127.0.0.1:3000`에서 쓰기 요청 | 브라우저는 `http://localhost:3000`으로 연다 |
+| Windows 개발 서버가 갑자기 꺼짐(`ERR_DLOPEN_FAILED`, sharp) | sharp 두 버전이 한 프로세스에 로드 | 앱의 sharp를 Next와 같은 버전으로 맞춤(지금 0.35.5). sharp를 올릴 때 Next 버전과 함께 확인 |
+| 화면 테스트가 가끔 실패(`Unable to find…`) | 부하가 크면 1초 기본 대기가 부족, 글이 먼저 보이고 버튼은 아직 없음 | 대기 시간은 `apps/web/test/setup-tokens.ts`의 상수. 누를 요소 자체를 `findBy*`로 기다린다 |
+| 용량 확인 중 사진을 올려도 DB 크기가 안 늘어남 | 테스트 DB에 지운 행의 빈 공간이 많음(물리 크기 기준 검사는 정상) | 확인할 때만 테스트 DB에서 `VACUUM FULL diary_photos` |
+| 인앱 브라우저가 숨겨진 상태에서 화면이 멈춘 듯함 | 숨은 탭은 렌더가 늦음 | 스크린샷보다 DOM 값(JS)으로 확인 |
+| `routes-social` DB 테스트 10개 실패 | 테스트 DB에 발자취 지리 데이터가 없음 | 데이터 문제. 필요하면 `pnpm db:geography` |
+| Git Bash `node -e`로 고친 정규식의 `\`가 사라짐 | 셸이 백슬래시를 먹음 | 정규식이 들어간 수정은 편집 도구로 |
+| 문서 줄바꿈이 통째로 바뀐 diff | 파일마다 CRLF/LF가 다름 | 고칠 때 그 파일의 줄바꿈을 유지 |
+
+새로 해결한 문제는 이 표에 한 줄로 더하고, 자세한 기록은 finish/06에 남긴다.
+
+## 9. 지금 상태 (2026-11-01)
+
+- 00~06 단계는 main 병합·운영 DB 마이그레이션·Vercel 배포까지 끝났다. 단계별 기록: [finish/README](docs/design/log-diary/finish/README.md), 예전 인계 이력: [finish/07 §14](docs/design/log-diary/finish/07-delivery-and-decisions.md).
+- 남은 일과 사용자 확인 대상: [todo/README](docs/design/log-diary/todo/README.md).
+- 하루 영상·AI 자동 생성·영상/음성·받아쓰기는 하고 싶지만 계획 단계만(todo/07 §14). 정밀 디자인은 요청이 올 때마다 고친다.
+- 옛 여행 기능 정리(08 단계)는 사용자 결정 대기.
+- 진행 중: `refactor/team-setup`(이슈 #1~#4: 새 저장소 설치 오류, 키 발급 안내, 이 규칙 문서들, 다이어리·공통 코드 정리).
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->
+
 ## 로컬 확인과 AI 작업 원칙
 
 - 실제 프로젝트의 설치·실행·검사 명령은 프로젝트에 정의된 명령을 확인해서 사용합니다. 아직 정의되지 않은 명령을 실행했다고 적거나 임의의 성공 결과를 만들지 않습니다.
 - PR에는 직접 확인한 localhost 주소·화면/기능, 실행한 검사·테스트·빌드 결과를 적습니다. 확인하지 못한 항목은 이유와 함께 명시하며 완료한 것으로 표시하지 않습니다.
 - AI도 작업 범위 밖의 코드·설정·다른 사람 작업을 임의로 변경하지 않습니다. 변경 내용과 검증 결과를 작성자가 직접 확인한 뒤 PR을 올립니다.
-- 이번 게시에서는 문서만 추가합니다. `front`·`backend` 생성, 브랜치 보호 설정, 제품 구현·설치·배포는 별도 작업입니다.
+- 문서의 규칙과 실제 권한 설정은 별개다. 현재 조직의 기본 권한은 Write이며 비공개 저장소 포크를 조직 차원에서 허용했다. 실제 브랜치 생성·브랜치 보호·개별 저장소 포크 설정은 별도로 확인한다.
+
+## 10. 공동작업규칙 이관 누락·추가·변경 대조 (2026-11-20)
+
+### 내가 이전 조직 문서에서 누락한 내용 — 이번에 복원
+
+- 원문 도입부: 사람과 AI가 가장 먼저 전체 규칙을 읽고, 새 사용자 지시가 다르면 문서도 함께 고친다는 원칙.
+- 0절 전체: 작업 위치별 AGENTS.md·CLAUDE.md·설계서·todo/finish 안내 표, 새 규칙 파일 위치 제한, 중복 대신 링크 사용.
+- 1절 전체: 로그의 목적, 하루/로그/공유 구조, 하루길 코드의 재료 역할과 옛 화면 변경 제한, PC·모바일·WebView 범위, Google 로그인, 제외 기능과 용량 제한, Vercel·Neon 및 운영 관리 담당.
+- 2절의 설계 우선·미정 확인·사용자 요구 우선, 기존 부품 우선 재사용, 테스트의 사전 조건·입력·기대 결과·경계·실패·권한·재조회 요건, 정해진 자동 검사 순서와 실제 숫자 보고, 테스트 DB·임시 로그인 및 PC/모바일 폭 직접 확인, finish/todo 정리 방식, 화면 PR 증거, 운영 DB 변경 승인. 이슈·브랜치·리뷰와 일반적인 로컬 확인은 이전 문서에도 있었지만 이 구체적인 기준은 누락했다.
+- 2절 마지막: 임의 중단 금지, 중단 사유·진행 알림, 지시한 범위만 작업하고 관련 문제는 임의 수정 대신 보고.
+- 3절 전체: 한국어·쉬운 설명, 예상 시간 안내, 사용자가 직접 할 때 PowerShell 명령만 안내, PC와 휴대폰 기능 동일.
+- 5절 전체: 한 파일 한 부품, 파일/컴포넌트/훅 이름, variant·size·CSS 변수 재사용, 공통/전용 부품 위치, 하드코딩 금지와 토큰·이름 붙은 상수·검사 우회 금지, 미사용 코드·파일·barrel 금지, import 별칭, 주석 언어·설명 기준, unknown·타입 좁히기·zod 검증, 리팩터링 전후 화면 동일·비교, 주변 코드 형식 유지.
+- 6절: 비밀 값의 출력 금지와 서버 보관(커밋 금지는 이전에도 있었음), DB만 영속 저장·브라우저/로컬 저장 금지와 로그 예외, 운영 DB 테스트·테스트 사용자 금지와 영구 삭제 확인, 경로·시간·가격 조작/데모 대체 금지, Google 선의 지도 제한, 참고 저장소 설치·실행 금지, Graphify 민감 정보 금지·산출물 제외.
+- 7절 전체: Node·pnpm·Docker·Windows 환경, 설치·setup·개발·검사·doctor·임시 사용자 명령, 키가 없을 때의 동작, 테스트 DB 안내, 승인 후 배포·마이그레이션 안내.
+- 8절 전체 12개 문제 해결 기록: Prisma 생성, DLL 잠금, Next 개발 캐시, WSL IPv6, localhost 출처, sharp 버전, 테스트 대기, DB 물리 용량, 숨은 인앱 탭, 지리 데이터 부족, 셸 백슬래시, 줄바꿈 차이. 새 해결 내용을 표와 finish에 남기는 규칙도 복원.
+- 9절 전체: 원문 기준일의 완료·남은 일·보류 기능·진행 브랜치 기록. 현재 블로그 개발 상태로 오해하지 않도록 원문 이력임을 명시.
+- Turborepo 관리 블록 전체: 설치 버전의 번들 문서 확인, 설정·명령 변경 전 관련 문서 확인, 관리 블록 유지와 해제 방식.
+- 이관 중 커밋 예시의 AI 공동작성 표시 줄도 제외했었다. 원문 예시는 보존하되 실제 사용하지 않은 AI 이름·버전을 작성자로 쓰지 않는다: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` (원문의 예시이며 AI가 만든 커밋에만 적용).
+
+### 내가 추가하거나 구체화한 내용 — 사용자 요청에 따른 것
+
+- 프론트/백엔드 담당자 실명·GitHub 아이디, vscodereader의 팀장·양쪽 겸임, @멘션과 작성자별 리뷰어 표.
+- main → front/backend → 기능 → 세부 작업의 4단계 구조, 최신 부모 기준 분기, 직접 push 금지와 이름 예시.
+- feat·fix·refactor·docs·chore의 뜻과 사례, CSS도 변경 목적에 따라 종류를 정한다는 설명.
+- Git/GitHub/브랜치/커밋/push/PR 용어, clone·이슈·작업·localhost·push·PR 화면의 base/compare·Reviewers 지정 절차.
+- 공통 컴포넌트·CSS 세부 작업 → 로컬 확인·수정 → PR·리뷰 → 부모 병합 → 병합된 작업 브랜치 삭제, 기능 통합 후 재검증과 파트/main 병합 순서.
+- 기존 구조·기존 공통 부품을 먼저 확인하고 필요한 폴더·파일만 생성, 불필요/중복/빈 폴더·파일 금지.
+- 커밋 및 PR 제목에 실제 대표 경로, 본문에 전체 상대 파일 경로와 추가/수정/삭제/이동별 작업, 새 폴더 용도, 8개 파일이면 8줄이며 생략 금지. Files changed와 대조.
+- 같은 파트 전원 리뷰, 양쪽 변경이면 합집합, 작성자 자체 점검, 지적 사항 수정·답변·재검증·재검토, 전원 최종 승인과 검사·대화·충돌 해소, 팀장의 main·배포 승인.
+
+### 내가 추가한 운영 설명과 기존 설명을 바꾼 부분
+
+- GitHub에서는 작성자 자신에게 리뷰 요청/자기 승인이 불가능하므로 본인은 자체 점검, 나머지 대상자 전원은 실제 Reviewers로 지정하도록 설명했다. 태그만 남기는 것은 리뷰 요청을 대신하지 않는다.
+- 코멘트와 승인 차이를 설명하고 코멘트만으로 병합하지 않도록 명시했다. 수정 후 이전 승인만으로 병합하지 않는 조건, 문서와 실제 브랜치 보호 설정의 차이를 추가했다.
+- 원래의 main → 큰 브랜치 → 작은 브랜치 설명은 사용자 요청의 front/backend 4단계 구조로 대체했다. 원래의 동기 아이디 미정/서로 한 명 지정 설명은 실제 파트 전원 리뷰로 대체했다.
+- 커밋/PR의 짧은 제목·선택적 본문 안내는 사용자 요청의 경로 포함 제목·파일별 전체 내역으로 구체화했고, 요약·변경·검증·리뷰를 필수로 했다. merge 제목에도 대표 경로를 넣었다.
+- 규칙 원본 저장소와 실제 개발 저장소 구분, 조직 주소·작성자·기준일, README/AGENTS/profile 동일 유지, AI 전달 파일 다운로드 안내를 추가했다.
+- 정의되지 않은 검사 명령/결과를 만들지 않기, 미확인 항목 명시, AI 결과의 작성자 직접 검토를 추가했다. 원문의 실제 명령·구조를 임의로 없애는 근거로 사용하지 않는다.
+- 이전 조직 문서의 '제품/다이어리 내용은 포함하지 않는다'는 범위 제한은 내가 임의로 붙인 것이므로 철회한다. 기존 다이어리 원문을 보존하며 프로젝트 고유 내용이라는 안내만 붙인다.
+- 이번 변경은 문서만 갱신한다. 제품 코드·팀원 권한·브랜치 보호·배포는 변경하지 않는다.
