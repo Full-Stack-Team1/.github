@@ -27,19 +27,20 @@
 
 | 구분 | 확정 내용 |
 | --- | --- |
-| 개발 저장소 | `Full-Stack-Team1/blog-cms`(비공개). 프론트 `/front`, 백엔드 `/backend` |
+| 개발 저장소 | `Full-Stack-Team1/blog-cms`(비공개). 프론트 `/front`, 백엔드 `/backend`, 프론트·백엔드 공용 API 요청·응답 타입 `/api` |
 | 프론트 | React + TypeScript, Vite, react-router. 기존 `/front` 구성 유지 |
 | API | TypeScript + Express를 **Cloudflare Workers**에서 실행(`cloudflare:node`의 `httpServerHandler`로 연결, `nodejs_compat` 사용) |
 | DB | **Cloudflare D1**. SQL은 **SQLite 문법** 기준 |
 | 이미지·첨부파일 | Cloudflare R2에 파일 저장, D1에는 파일 경로와 정보(이름·크기·종류·작성자)만 저장 |
 | 배포 | React 빌드 결과와 API를 Cloudflare Workers에서 함께 제공 |
-| 배포 설정·명령 | Cloudflare `wrangler`(설정 파일 `wrangler.jsonc`) |
+| 배포 설정·명령 | Cloudflare `wrangler`. 설정 파일은 저장소 맨 위 **`/wrangler.jsonc`** 하나로, API 시작 파일(`/backend`)·화면 파일(`/front/dist`)·D1·R2 연결과 D1 마이그레이션 폴더(`/backend/migrations`)를 함께 적는다(2026-11-24 결정). Cloudflare는 GitHub 조직과 연동되어 있고 `blog-cms`만 연결됐다 |
 | 패키지 관리자 | pnpm |
 | 환경 분리 | 로컬 개발·테스트는 wrangler가 만드는 로컬 D1, 운영은 Cloudflare 원격 D1. 개발·테스트에 운영 D1을 쓰지 않는다 |
 
 - MariaDB·MySQL·PostgreSQL 전용 문법(예: `AUTO_INCREMENT`, `ENUM`, `NOW()`)으로 작성하지 않는다. AI에게 작업을 맡길 때도 "Cloudflare D1(SQLite)"이라고 밝힌다.
 - Workers에서는 서버 컴퓨터의 파일 시스템에 파일을 저장할 수 없다. 업로드 파일은 R2로 보낸다.
-- 아직 정하지 않은 것: `wrangler.jsonc`·마이그레이션 폴더 위치, 백엔드 폴더 분리(보류), 로그인 방식, 4절 "백엔드 아직 정해지지 않은 파트 분배"의 담당자. 정해지기 전에는 임의로 확정하지 않는다.
+- API 요청·응답 모양은 `/api/`의 TypeScript 타입으로 정하고 프론트와 백엔드가 같은 타입을 가져다 쓴다. `/api/`에는 타입만 두고 실행 코드·비밀 값을 두지 않는다. 타입을 바꾸는 PR은 그 타입을 쓰는 프론트·백엔드 담당자 모두에게 검토를 요청한다.
+- 아직 정하지 않은 것: 백엔드 폴더 분리(보류), 로그인 방식, 4절 "백엔드 아직 정해지지 않은 파트 분배"의 담당자. 정해지기 전에는 임의로 확정하지 않는다.
 
 ## 2. 일하는 순서
 
@@ -162,7 +163,7 @@
 | 신고 처리 | 신고를 받기만 하고 처리(누적 시 숨김, 관리자 확인) 규칙이 없다 | 박세웅 |
 | 글 메타 태그·사이트맵·robots·RSS 출력 | SPA라 서버가 따로 만들어 줘야 검색엔진에 노출된다 | 최성원 |
 | D1 표로 옮기기 | `button_action.md` 0-2절 표는 MariaDB 문법(`CHAR(36)`, `VARCHAR`, `AUTO_INCREMENT` 등) | 각 영역 담당, 검토 최성원 |
-| API 응답 타입 공유 | 프론트(`/front/src/dummy`)와 백엔드가 같은 응답 모양을 쓰도록 TypeScript 타입을 한 곳에 둔다 | 위치는 팀 결정 |
+| API 요청·응답 타입 폴더 `/api/` 만들기 | 2026-11-24 결정: `blog-cms` 맨 위 `/api/`에 TypeScript 타입만 둔다. 영역별 파일(예: `/api/posts.ts`, `/api/comments.ts`, `/api/users.ts`), 공통 응답·오류 모양은 `/api/common.ts` | 각 영역 백엔드 담당이 자기 타입 작성, 폴더·`common.ts`는 공통 기반 담당(미정) |
 | 프론트 연결 | 더미 데이터를 API 호출로 바꾸고 `button_action.md` 6절의 공통 호출 함수를 만든다 | 프론트 파트 |
 
 ### 이번 팀의 필수 실행 안내 — 처음 GitHub를 사용하는 팀원도 동일하게 적용
@@ -205,7 +206,7 @@
 
 ### DB 구조 변경(D1 마이그레이션)
 
-- 표·열·인덱스를 바꾸는 SQL은 D1 마이그레이션 파일로만 관리한다. `wrangler d1 migrations create <DB이름> <설명>`으로 번호 붙은 SQL 파일을 만든다. 폴더 위치는 팀이 정한 뒤 이 절에 적는다.
+- 표·열·인덱스를 바꾸는 SQL은 D1 마이그레이션 파일로만 관리한다. `wrangler d1 migrations create <DB이름> <설명>`으로 번호 붙은 SQL 파일을 만든다. 파일은 `/backend/migrations/`에 둔다(`/wrangler.jsonc`의 `migrations_dir`).
 - 이미 병합된 마이그레이션 파일은 고치지 않고, 바꿀 내용은 새 번호 파일로 추가한다.
 - 로컬 적용은 `wrangler d1 migrations apply <DB이름> --local`로 한다. 운영 적용(`--remote`)은 팀장 승인 후 팀장이 한다.
 - DB 구조를 바꾸는 작업은 이슈에 바뀌는 표·열과 이유를 적고, PR 본문 "배포 전" 절에 운영에 적용할 마이그레이션 파일 이름을 적는다.
@@ -438,7 +439,7 @@ Closes #이슈번호
 ## 9. 현재 적용 상태와 AI 작업
 
 - 기준은 Full-Stack-Team1 조직이다. 조직 저장소는 `.github`(소개·공통규칙)와 `blog-cms`(제품)다. 기술 스택은 1절 "확정 기술 스택"을 따르고, 운영 주소·진행률은 임의로 확정하지 않는다.
-- 조직 기본 권한 Write와 비공개 포크 조직 허용은 설정 기록이다. 실제 브랜치·브랜치 보호·개별 저장소 권한·포크 허용은 작업 때 확인한다. 규칙 문서만으로 GitHub의 병합 제한이 자동 적용되지는 않는다.
+- 조직 기본 권한은 **Read**다(2026-11-24). 팀원은 `blog-cms`에만 개별 Write 권한이 있고 `.github`(공동작업규칙)는 읽기만 할 수 있어, 규칙은 팀장만 고친다. 조직에 새 저장소를 만들면 함께 작업할 팀원에게 저장소별 쓰기 권한을 따로 준다. 비공개 포크 조직 허용은 설정 기록이다. 실제 브랜치·브랜치 보호·개별 저장소 권한·포크 허용은 작업 때 확인한다. 규칙 문서만으로 GitHub의 병합 제한이 자동 적용되지는 않는다.
 - 실제 실행한 명령·실제 숫자·직접 확인한 화면만 보고한다. 미확인은 이유와 함께 명시한다.
 - AI도 범위 밖 코드·설정·다른 사람 작업을 임의 변경하지 않는다. 작성자가 변경과 검증을 직접 확인한 뒤 PR을 올린다.
 - AI 공동작성 표시가 필요한 커밋에는 실제 사용한 AI의 올바른 공동작성 정보를 사용한다. 다른 AI 이름·버전을 복사해 적지 않는다.
