@@ -39,7 +39,7 @@
 
 - MariaDB·MySQL·PostgreSQL 전용 문법(예: `AUTO_INCREMENT`, `ENUM`, `NOW()`)으로 작성하지 않는다. AI에게 작업을 맡길 때도 "Cloudflare D1(SQLite)"이라고 밝힌다.
 - Workers에서는 서버 컴퓨터의 파일 시스템에 파일을 저장할 수 없다. 업로드 파일은 R2로 보낸다.
-- 아직 정하지 않은 것: `wrangler.jsonc`·마이그레이션 폴더 위치, 백엔드 폴더 분리(보류), 로그인 방식. 정해지기 전에는 임의로 확정하지 않는다.
+- 아직 정하지 않은 것: `wrangler.jsonc`·마이그레이션 폴더 위치, 백엔드 폴더 분리(보류), 로그인 방식, 글 공개 범위, 4절 "백엔드 아직 정해지지 않은 파트 분배"의 담당자. 정해지기 전에는 임의로 확정하지 않는다.
 
 ## 2. 일하는 순서
 
@@ -73,7 +73,7 @@
 
 `vscodereader`는 팀장이며 프론트와 백엔드를 모두 맡는다.
 
-### 백엔드 담당 영역 (2026-11-24)
+### 백엔드 담당 영역과 구현 목록 (2026-11-24)
 
 | 이름 | 영역 | 포함 기능 |
 | --- | --- | --- |
@@ -81,8 +81,89 @@
 | 박세웅 | 사용자·댓글 | 회원가입·인증, 댓글 작성·신고, 프로필·권한 관리 |
 | 최성원(@vscodereader) | SEO·성능 | DB 스키마 최적화, SEO 친화 URL·메타 태그, 로딩 속도 개선·캐싱 |
 
-- 각자 맡은 영역의 API·D1 표·마이그레이션을 만든다. 다른 사람 영역의 표·API를 바꿔야 하면 이슈에서 해당 담당자와 먼저 범위를 정한다.
-- 여러 영역이 함께 쓰는 표(예: 사용자 표를 글·댓글이 참조)는 이슈에 연결 관계를 적고 관련 담당자 모두에게 검토를 요청한다.
+- 기준 문서: `blog-cms`의 `/front/button_action.md`(버튼마다 지금 동작·서버 연결 시 할 일·API·검증·오류 문구). 아래 "절"은 이 문서의 절 번호다. 프론트 화면은 `/front/src/screens/…`, 더미 데이터는 `/front/src/dummy/…`에서 확인한다.
+- `button_action.md`의 0절 "스택"과 0-2절 표는 MariaDB 기준으로 쓰여 있다. **구현은 1절 "확정 기술 스택"(Express on Workers + D1)을 따르고 SQL은 SQLite 문법으로 바꿔 만든다.** API 주소·요청·응답 모양은 그대로 따른다.
+- 각자 맡은 영역의 API·D1 표·마이그레이션·테스트를 만든다. 다른 사람 영역의 표·API를 바꿔야 하면 이슈에서 해당 담당자와 먼저 범위를 정한다. 여러 영역이 함께 쓰는 표(예: 글·댓글이 참조하는 사용자 표)는 이슈에 연결 관계를 적고 관련 담당자 모두에게 검토를 요청한다.
+- 구현 순서: ① 로그인·사용자(박세웅)와 공통 기반이 먼저 있어야 다른 API가 "누가 요청했는지"를 안다 → ② 글·카테고리·첨부(정민성), 댓글(박세웅) → ③ 목록·검색·통계·캐싱·SEO(최성원 및 미정 파트).
+- 아래 표 이름은 제안이다. 최종 이름·열은 담당자가 설계하고 최성원이 스키마를 검토한다.
+
+#### 정민성 — 콘텐츠 관리
+
+| 기능 | 화면(주소) | API | 기준 절 |
+| --- | --- | --- | --- |
+| 자동저장·임시저장 | 글쓰기 `/blog/write` 위 막대 | `POST /api/posts/drafts`, `PUT /api/posts/drafts/:draftId`, `GET /api/posts/drafts/count`, `GET /api/posts/drafts`, `GET/DELETE /api/posts/drafts/:id` | 1-1, 1-2, 1-4 |
+| 발행·수정 | 글쓰기 [발행] 창 | `GET /api/posts/publish-defaults`, `POST /api/posts/:id/publish`(카테고리·주제·공개 범위·태그·옵션), `GET /api/posts/:id` | 1-3 |
+| 글 읽기 | 글 보기 `/blog/p/:id`, 내 블로그·남의 블로그 `/blog/me`·`/blog/u/:id` | `GET /api/posts/:id`, `GET /api/blogs/:userId`의 글 목록(카테고리별) | 8-4, 8-5 |
+| 글 관리 | 블로그 관리 > 글 관리 `/blog/manage/posts` | `GET /api/manage/posts?state=&category=&page=&field=&q=`, `PATCH /api/posts/bulk`, `PATCH /api/posts/:id`, `DELETE /api/posts` | 8-13 |
+| 페이지·공지·서식 | `/blog/manage/pages`·`notices`·`templates` | `GET/DELETE /api/manage/{pages\|notices\|templates}` | 8-13 |
+| 카테고리 | 블로그 관리 > 카테고리, 발행 창, 블로그 왼쪽 메뉴 | `GET /api/categories`, `PUT /api/categories`(트리·순서, 글 있는 카테고리 삭제는 409), `GET /api/blogs/:userId/categories`, 카테고리 표시 설정 `PATCH /api/blog/settings { category }` | 1-3, 8-5, 8-13 |
+| 태그 | 발행 창 태그 입력(최대 30개), 글 관리 검색(태그) | 발행 API의 `tags` 저장(`post_tags` 갈아끼우기) | 1-3 |
+| 본문 저장·보안 | 글쓰기 전체 | 블록 JSON 저장, 검색용 `plain_text` 추출, 본문 HTML 허용 태그만 남기기(XSS) | 0, 0-1 |
+| 사진·파일(R2) | 글쓰기 사진·파일·사진 편집 | `POST /api/media/images`, `POST /api/media/images/:id/edit`, `GET /api/media/:id`, `POST /api/media/files`, `GET /api/media/:id/download` | 3-1, 3-2, 3-5 |
+| 링크 카드 | 글쓰기 1행 "링크" | `POST /api/link-preview`(내부망 주소 차단·리다이렉트 3회·5초·64KB 제한) | 2-7 |
+| 장소 | 글쓰기 1행 "장소" | `GET /api/places/search?q=`, `GET /api/places/static-map?lat=&lng=`(지도 제공처는 팀 결정 필요) | 2-9 |
+| 맞춤법 | 글쓰기 맞춤법 막대 | `POST /api/spellcheck`(맞춤법 제공처는 팀 결정 필요) | 2-3 |
+
+- 제안 표: `posts`, `post_drafts`, `categories`, `post_tags`, `media`.
+
+#### 박세웅 — 사용자·댓글
+
+| 기능 | 화면(주소) | API | 기준 절 |
+| --- | --- | --- | --- |
+| 회원가입·로그인·로그아웃 | 아직 로그인 화면 없음, 오른쪽 위 로그아웃 버튼 | 로그인 방식 결정 후 회원가입·로그인 API 설계, `GET /api/me`(로그인 사용자·테마), `PATCH /api/me { theme }`, `DELETE /api/session` | 0, 5, 9 |
+| 인증·권한 확인 | 모든 API | 서명된 세션 쿠키, 요청마다 사용자 확인(비로그인 401), 블로그 주인 확인(남이면 403, 남의 비공개 글은 404) | 0 |
+| 댓글 | 글 보기·피드의 댓글, 휴대폰 댓글 시트 | `GET/POST /api/posts/:id/comments`, `PATCH/DELETE /api/comments/:id`, `POST/DELETE /api/comments/:id/like` | 8-3 |
+| 댓글 관리 | 블로그 관리 > 댓글·방명록·휴지통 | `GET /api/manage/comments?kind=comment\|guestbook&trash=&view=&q=`, `POST /api/manage/comments/trash`, `POST …/restore`, `DELETE …/comments` | 8-13 |
+| 댓글 설정·스팸 | 블로그 관리 > 댓글·방명록 설정, 설정 > 댓글·안부글 권한 | `PATCH /api/blog/settings { comments, commentAuth }`, `PUT /api/blog/spam-filters`(걸린 새 댓글은 휴지통) | 8-13, 8-15 |
+| 신고 | 글 ⋯ 메뉴 [신고하기] | `POST /api/reports` | 8-2 |
+| 프로필 | 블로그 커버·홈편집 `/blog/me/edit`, 설정 > 블로그 정보 | `GET /api/blogs/:userId`(프로필 부분), `PATCH /api/blogs/me`, `PATCH /api/blog { title, nickname, intro, image }` | 8-5, 8-6, 8-13, 8-15 |
+| 권한 관리 | 블로그 관리 > 팀블로그, 설정 > 차단 설정·차단된 글목록 | `GET /api/blog/members`, `POST /api/blog/members/invite`, `PATCH /api/blog/members/:id { role }`, `GET /api/blog/blocked`, 차단 설정 `PATCH /api/blog/settings { block }` | 8-13, 8-15 |
+
+- 제안 표: `users`, `sessions`, `comments`, `comment_likes`, `reports`, `blog_members`, `blocks`.
+
+#### 최성원 — SEO·성능
+
+| 기능 | 내용 | 기준 절 |
+| --- | --- | --- |
+| DB 스키마 최적화 | 모든 담당자의 D1 표·마이그레이션 검토, 목록·검색 쿼리 인덱스, `plain_text` 검색 방식 | 0-2 |
+| SEO 친화 URL | 글 주소 규칙(지금 `/blog/p/:id`, 블로그 설정의 "포스트 주소" 숫자·문자 선택과 연결), 블로그 주소 설정 `PATCH /api/blog/settings { address }` | 8-0, 8-13 |
+| 메타 태그 | 화면이 React(SPA)라 검색엔진이 글 제목·설명을 못 본다 → Worker가 글 페이지 HTML에 `<title>`·`description`·공유 미리보기(og) 태그를 넣어 보낸다 | — (추가) |
+| 사이트맵·RSS | `sitemap.xml`, `robots.txt`, RSS(블로그 설정의 RSS 전체·부분 공개, 10~50개) `PATCH /api/blog/settings { rss }` | 8-13 (일부 추가) |
+| 로딩 속도·캐싱 | 목록·홈 API 응답 캐싱, R2 사진의 캐시 헤더, 화면 파일 캐싱 | — (추가) |
+
+#### 백엔드 아직 정해지지 않은 파트 분배
+
+아래는 화면과 API는 있지만 위 세 영역 어디에도 딱 맞지 않아 담당자가 정해지지 않았다. 팀장이 나눠 이 표의 "담당" 칸을 채운다. 정해지기 전에는 이슈에서 담당을 먼저 정하고 시작한다.
+
+| 기능 | 화면(주소) | API | 기준 절 | 담당 |
+| --- | --- | --- | --- | --- |
+| 공통 기반 | 모든 API | 응답 형식 `{ data, revision }`·오류 `{ error, code }`, 같은 출처 확인(403)·요청 수 제한(429), `Idempotency-Key`(중복 저장 방지), `If-Match` revision(동시 수정 409), 입력 검증(zod) | 0 | 미정 |
+| 홈 피드·블로그 홈 목록 | `/blog`(휴대폰 피드·넓은 화면 블로그 홈), `/blog/monthly` | `GET /api/feed`, `POST /api/feed/hide`, `GET /api/home/featured`·`popular`·`hot-topics`·`monthly-blogs`·`recommended-blogs`·`focus` | 8-2, 8-10, 8-11 | 미정 |
+| 검색 | `/blog/explore`, 위 막대 검색 | `GET /api/search?q=&topic=` | 8-9 | 미정 |
+| 공감·공유 | 글 ♡·보내기 | `POST/DELETE /api/posts/:id/like`, `POST /api/posts/:id/share` | 8-2 | 미정 |
+| 북마크 | 글 책갈피, `/blog/bookmarks` | `PUT/DELETE /api/bookmarks/:postId`, `GET /api/bookmarks` | 8-14 | 미정 |
+| 이웃 | `/blog/me/neighbors`, 설정 > 이웃 관리 | `GET /api/neighbors`, `POST/DELETE /api/neighbors/:userId`, `POST /api/neighbor-groups`, `GET /api/neighbors/requests` | 8-7, 8-15 | 미정 |
+| 알림 | `/blog/notice`, 위 막대 🔔, 블로그 홈 내 소식 | `GET/DELETE /api/notifications`, `DELETE /api/notifications/:id`, `POST /api/notifications/read`, `GET /api/me/activity` + 댓글·공감·이웃 신청 때 알림 만들기 | 8-9, 8-10 | 미정 |
+| 통계 | `/blog/me/stats`, 블로그 관리 홈·방문 통계·유입 경로 | `GET /api/stats`, `GET /api/stats/summary`, `GET /api/stats/inflow`, `GET /api/stats/referrers`, `POST /api/posts/:id/read`(조회 기록) | 8-4, 8-8, 8-13 | 미정 |
+| 블로그 꾸미기 설정 | 블로그 관리 > 사이드바·메뉴·나의 링크·모바일·플러그인·콘텐츠 설정, 설정 > 기본 서체·콘텐츠 공유 | `PUT /api/blog/sidebar`, `PUT /api/blog/menu`, `PUT /api/blog/links`, `PUT /api/blog/plugins/:id`, `PATCH /api/blog/settings { sidebar, mobile, contents, font, share, timezone }` | 8-13, 8-15 | 미정 |
+| 블로그 초기화 | 설정 > 블로그 초기화 | `POST /api/blog/reset`(글·사진·동영상·댓글·카테고리·R2 파일 삭제, 재확인) — 여러 영역 표를 함께 지운다 | 8-15 | 미정 |
+
+#### 화면에는 있지만 `button_action.md`에 API가 없어 추가로 구현해야 하는 것
+
+| 할 일 | 이유 | 담당 |
+| --- | --- | --- |
+| 회원가입·로그인 API와 화면 연결 | 로그인 방식이 미정이라 문서에 `GET /api/me`·`DELETE /api/session`만 있다 | 박세웅(방식은 팀 결정) |
+| 공개 범위 결정 | `button_action.md` 0절·1-3절은 "모든 글은 본인만, 발행은 비공개만"인데 8-1절은 "남에게는 공개 글만 보인다"로 서로 다르다. 피드·검색·이웃 API가 이 결정에 달려 있다 | 팀 결정 |
+| 글 종류(공지·서식·페이지) 저장 | 관리 메뉴 [글쓰기 ⌄]가 `/blog/write?type=notice\|template\|page`로 가지만 저장 형식이 없다 → `posts`에 종류 열 | 정민성 |
+| 기존 글 불러와 수정 | 글 관리 [수정]이 `/blog/write?id=`로 가지만 불러오기가 없다 → `GET /api/posts/:id` 응답을 편집기 형식으로 | 정민성(프론트 연결은 프론트) |
+| 태그 목록·태그별 글 | 사이드바 태그 모듈, 태그 검색 → `GET /api/tags`, 태그로 글 찾기 | 정민성 |
+| 버려진 사진 정리 | 글에 묶이지 않은 사진을 하루 뒤 지우는 정리 작업 → Workers 예약 실행(Cron Triggers)으로 D1·R2 정리 | 정민성 |
+| 중복 저장 키 정리 | `idempotency_keys`를 24시간 뒤 지우는 정리 작업 | 공통 기반 담당(미정) |
+| 신고 처리 | 신고를 받기만 하고 처리(누적 시 숨김, 관리자 확인) 규칙이 없다 | 박세웅 |
+| 글 메타 태그·사이트맵·robots·RSS 출력 | SPA라 서버가 따로 만들어 줘야 검색엔진에 노출된다 | 최성원 |
+| D1 표로 옮기기 | `button_action.md` 0-2절 표는 MariaDB 문법(`CHAR(36)`, `VARCHAR`, `AUTO_INCREMENT` 등) | 각 영역 담당, 검토 최성원 |
+| API 응답 타입 공유 | 프론트(`/front/src/dummy`)와 백엔드가 같은 응답 모양을 쓰도록 TypeScript 타입을 한 곳에 둔다 | 위치는 팀 결정 |
+| 프론트 연결 | 더미 데이터를 API 호출로 바꾸고 `button_action.md` 6절의 공통 호출 함수를 만든다 | 프론트 파트 |
 
 ### 이번 팀의 필수 실행 안내 — 처음 GitHub를 사용하는 팀원도 동일하게 적용
 
