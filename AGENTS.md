@@ -139,7 +139,7 @@
 
 | 기능 | 화면(주소) | API | 기준 절 | 담당 |
 | --- | --- | --- | --- | --- |
-| 공통 기반 | 모든 API | 응답 형식 `{ data, revision }`·오류 `{ error, code }`, 같은 출처 확인(403)·요청 수 제한(429), `Idempotency-Key`(중복 저장 방지), `If-Match` revision(동시 수정 409), 입력 검증(zod) | 0 | 미정 |
+| 공통 기반 | 모든 API | 응답 형식 `{ data, revision }`·오류 `{ error, code }`, 같은 출처 확인(403)·요청 수 제한(429), `Idempotency-Key`(중복 저장 방지), `If-Match` revision(동시 수정 409), 입력 검증(zod) | 0 | 최성원(2026-11-25) |
 | 홈 피드·블로그 홈 목록 | `/blog`(휴대폰 피드·넓은 화면 블로그 홈), `/blog/monthly` | `GET /api/feed`, `POST /api/feed/hide`, `GET /api/home/featured`·`popular`·`hot-topics`·`monthly-blogs`·`recommended-blogs`·`focus` | 8-2, 8-10, 8-11 | 미정 |
 | 검색 | `/blog/explore`, 위 막대 검색 | `GET /api/search?q=&topic=` | 8-9 | 미정 |
 | 공감·공유 | 글 ♡·보내기 | `POST/DELETE /api/posts/:id/like`, `POST /api/posts/:id/share` | 8-2 | 미정 |
@@ -160,11 +160,11 @@
 | 기존 글 불러와 수정 | 글 관리 [수정]이 `/blog/write?id=`로 가지만 불러오기가 없다 → `GET /api/posts/:id` 응답을 편집기 형식으로 | 정민성(프론트 연결은 프론트) |
 | 태그 목록·태그별 글 | 사이드바 태그 모듈, 태그 검색 → `GET /api/tags`, 태그로 글 찾기 | 정민성 |
 | 버려진 사진 정리 | 글에 묶이지 않은 사진을 하루 뒤 지우는 정리 작업 → Workers 예약 실행(Cron Triggers)으로 D1·R2 정리 | 정민성 |
-| 중복 저장 키 정리 | `idempotency_keys`를 24시간 뒤 지우는 정리 작업 | 공통 기반 담당(미정) |
+| 중복 저장 키 정리 | `idempotency_keys`를 24시간 뒤 지우는 정리 작업 | 공통 기반 담당(최성원) |
 | 신고 처리 | 신고를 받기만 하고 처리(누적 시 숨김, 관리자 확인) 규칙이 없다 | 박세웅 |
 | 글 메타 태그·사이트맵·robots·RSS 출력 | SPA라 서버가 따로 만들어 줘야 검색엔진에 노출된다 | 최성원 |
 | D1 표로 옮기기 | `button_action.md` 0-2절 표는 MariaDB 문법(`CHAR(36)`, `VARCHAR`, `AUTO_INCREMENT` 등) | 각 영역 담당, 검토 최성원 |
-| API 요청·응답 타입 폴더 `/api/` 만들기 | 2026-11-24 결정: `blog-cms` 맨 위 `/api/`에 TypeScript 타입만 둔다. 영역별 파일(예: `/api/posts.ts`, `/api/comments.ts`, `/api/users.ts`), 공통 응답·오류 모양은 `/api/common.ts` | 각 영역 백엔드 담당이 자기 타입 작성, 폴더·`common.ts`는 공통 기반 담당(미정) |
+| API 요청·응답 타입 폴더 `/api/` 만들기 | 2026-11-24 결정: `blog-cms` 맨 위 `/api/`에 TypeScript 타입만 둔다. 영역별 파일(예: `/api/posts.ts`, `/api/comments.ts`, `/api/users.ts`), 공통 응답·오류 모양은 `/api/common.ts` | 각 영역 백엔드 담당이 자기 타입 작성, 폴더·`common.ts`는 공통 기반 담당(최성원) |
 | 프론트 연결 | 더미 데이터를 API 호출로 바꾸고 `button_action.md` 6절의 공통 호출 함수를 만든다 | 프론트 파트 |
 
 ### 이번 팀의 필수 실행 안내 — 처음 GitHub를 사용하는 팀원도 동일하게 적용
@@ -206,9 +206,9 @@
 
 ### DB 구조 변경(D1 마이그레이션)
 
-- 표·열·인덱스를 바꾸는 SQL은 D1 마이그레이션 파일로만 관리한다. `wrangler d1 migrations create <DB이름> <설명>`으로 번호 붙은 SQL 파일을 만든다. 파일은 `/backend/migrations/`에 둔다(`/wrangler.jsonc`의 `migrations_dir`).
+- 표·열·인덱스를 바꾸는 SQL은 D1 마이그레이션 파일로만 관리한다. `backend` 폴더에서 `pnpm exec wrangler d1 migrations create blog-cms-db <설명> --config ../wrangler.jsonc`로 번호 붙은 SQL 파일을 만든다. 파일은 `/backend/migrations/`에 둔다(`/wrangler.jsonc`의 `migrations_dir`).
 - 이미 병합된 마이그레이션 파일은 고치지 않고, 바꿀 내용은 새 번호 파일로 추가한다.
-- 로컬 적용은 `wrangler d1 migrations apply <DB이름> --local`로 한다. 운영 적용(`--remote`)은 팀장 승인 후 팀장이 한다.
+- 로컬 적용은 `backend` 폴더에서 `pnpm db:migrate:local`로 한다. 운영 적용(`--remote`)은 팀장 승인 후 팀장이 한다.
 - DB 구조를 바꾸는 작업은 이슈에 바뀌는 표·열과 이유를 적고, PR 본문 "배포 전" 절에 운영에 적용할 마이그레이션 파일 이름을 적는다.
 - 검증은 타입 검사 → 테스트 → 로컬 D1에 마이그레이션 적용 후 API 통합 검사 → 빌드 순서로 하고, 실제 실행한 명령과 결과 숫자를 적는다.
 
@@ -227,12 +227,12 @@ main
 
 #### blog-cms 백엔드 브랜치 (2026-11-25 팀장 생성)
 
-모두 최신 `main`과 같은 시점에서 만들었다. 담당은 4절 "백엔드 담당 영역과 구현 목록"을 따르고, "미정"은 담당이 정해진 뒤 시작한다. 세부 작업 브랜치에서 작업을 시작하기 전에 이슈를 만들고(이슈 1개 = 세부 작업 브랜치 1개 = PR 1개), 시작 직전에 부모 기능 브랜치의 최신 내용을 받아 온다. 목록에 없는 작업이 필요하면 같은 이름 규칙으로 세부 작업 브랜치를 추가한다.
+모두 최신 `main`과 같은 시점에서 만들었다. 담당은 4절 "백엔드 담당 영역과 구현 목록"을 따르고, "미정"은 담당이 정해진 뒤 시작한다. 세부 작업 브랜치에서 작업을 시작하기 전에 이슈를 만들고(이슈 1개 = 세부 작업 브랜치 1개 = PR 1개), 시작 직전에 `backend`와 부모 기능 브랜치의 최신 내용을 받아 온다(`git fetch origin` 후 `git merge origin/backend`, `git merge origin/<부모 기능 브랜치>`. 포크는 `origin` 대신 `upstream`). 목록에 없는 작업이 필요하면 같은 이름 규칙으로 세부 작업 브랜치를 추가한다.
 
 ```text
 main
 └── backend                                  # 백엔드 통합(직접 push 금지)
-    ├── feat/backend-common                  # 공통 기반 — 담당 미정 · 가장 먼저
+    ├── feat/backend-common                  # 공통 기반 — 최성원 · 가장 먼저
     │   ├── feat/backend-common-setup        # /wrangler.jsonc, Express on Workers 뼈대, D1·R2 연결
     │   ├── feat/backend-common-response     # 응답·오류 형식, zod 검증, 같은 출처·요청 수 제한
     │   ├── feat/backend-common-idempotency  # Idempotency-Key, revision(If-Match), 키 정리 작업
@@ -292,7 +292,7 @@ main
 ```
 
 - 아직 정하지 않은 것이 있는 브랜치: 담당 미정 파트(위 "담당 미정"), 장소·맞춤법 제공처(`feat/backend-editor-place`·`-spellcheck`), Google OAuth 로컬·운영 테스트 방법(`feat/backend-auth-google-login`), 백엔드 폴더를 담당자별로 나눌지(보류), 운영 주소(도메인, `feat/backend-seo-*`).
-- 먼저 `feat/backend-common-setup`이 병합돼야 다른 세부 작업이 같은 뼈대 위에서 시작할 수 있다. 그 전에 시작하는 작업은 이슈에 그 사실을 적는다.
+- 공통 뼈대(`feat/backend-common-setup`)는 2026-11-25 `backend`에 병합됐다(이슈 #20, PR #21·#22). 각 세부 작업은 `backend`를 받아 이 뼈대 위에서 시작한다.
 
 - `front`와 `backend`는 최신 `main`에서 각각 만든 장기 유지 브랜치다. 해당 파트의 기능 브랜치는 최신 파트 브랜치에서, 세부 작업 브랜치는 최신 기능 브랜치에서 만든다.
 - 작업 전에 범위·범위 밖·확인 방법을 적은 이슈를 만든다. 이슈 하나당 작업 브랜치 하나와 PR 하나를 사용한다. 아래 작업 전 이슈 필수 규칙을 따른다.
@@ -480,7 +480,7 @@ Closes #이슈번호
 - 제공처 비밀 키는 서버에만 둔다. 명시적으로 공개 사용이 허용된 브라우저 키만 예외로 한다.
 - 영속 데이터는 DB에 저장한다. 브라우저 저장소(localStorage 등)·로컬 `data/` 파일로 대체하지 않는다.
 - 운영 DB를 테스트에 쓰거나 운영 DB에 테스트 사용자를 만들지 않는다. 영구 삭제는 사용자 확인 후 진행한다.
-- 비밀 값(외부 API 키, 세션 서명 키 등)은 운영에서는 `wrangler secret`으로 Cloudflare에 넣고, 로컬은 `/backend/.dev.vars`에 둔다. `.dev.vars`와 `.env*`는 커밋하지 않고, 키 이름만 예제 파일(`.dev.vars.example`)에 값 없이 적는다.
+- 비밀 값(외부 API 키, 세션 서명 키 등)은 운영에서는 `wrangler secret`으로 Cloudflare에 넣고, 로컬은 저장소 맨 위 `/.dev.vars`에 둔다(`/wrangler.jsonc`와 같은 위치여야 wrangler가 읽는다). `.dev.vars`와 `.env*`는 커밋하지 않고, 키 이름만 예제 파일(`/.dev.vars.example`)에 값 없이 적는다.
 - D1·R2는 코드에서 `env`의 바인딩으로만 사용한다. Cloudflare 계정 API 토큰을 코드·문서에 적지 않는다.
 - Cloudflare 계정·운영 D1·R2·배포 권한은 팀장이 관리한다. 운영 D1에 직접 SQL을 실행해 데이터를 고치거나 지우지 않는다.
 - 쿼리는 값을 문자열로 이어 붙이지 않고 `prepare("… WHERE id = ?").bind(id)`처럼 매개변수로 보낸다(SQL 인젝션 방지).
