@@ -483,7 +483,7 @@ Closes #이슈번호
 - 운영 DB를 테스트에 쓰거나 운영 DB에 테스트 사용자를 만들지 않는다. 영구 삭제는 사용자 확인 후 진행한다.
 - 비밀 값(외부 API 키, 세션 서명 키 등)은 운영에서는 `wrangler secret`으로 Cloudflare에 넣고, 로컬은 저장소 맨 위 `/.dev.vars`에 둔다(`/wrangler.jsonc`와 같은 위치여야 wrangler가 읽는다). `.dev.vars`와 `.env*`는 커밋하지 않고, 키 이름만 예제 파일(`/.dev.vars.example`)에 값 없이 적는다.
 - D1·R2는 코드에서 `env`의 바인딩으로만 사용한다. Cloudflare 계정 API 토큰을 코드·문서에 적지 않는다.
-- Cloudflare 계정·운영 D1·R2·배포 권한은 팀장이 관리한다. 운영 D1에 직접 SQL을 실행해 데이터를 고치거나 지우지 않는다.
+- Cloudflare 계정은 팀장이 관리한다. 백엔드 담당 @PswHp, @minseongdeveloper에게도 Workers Platform Admin 권한을 줘서 배포할 수 있다(2026-11-25 팀장 결정, 그 밖에 D1 Read·Workers Platform Read-only·R2 Read). 운영 D1에 직접 SQL을 실행해 데이터를 고치거나 지우지 않는다.
 - 쿼리는 값을 문자열로 이어 붙이지 않고 `prepare("… WHERE id = ?").bind(id)`처럼 매개변수로 보낸다(SQL 인젝션 방지).
 - SQLite에는 날짜·참거짓 전용 형식이 없으므로 날짜는 ISO 문자열(`TEXT`), 참거짓은 `INTEGER` 0/1로 저장한다.
 - 로컬 D1 파일이 생기는 `.wrangler/` 폴더는 커밋하지 않는다.
