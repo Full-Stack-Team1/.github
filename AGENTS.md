@@ -94,7 +94,7 @@
 | 기능 | 화면(주소) | API | 기준 절 |
 | --- | --- | --- | --- |
 | 자동저장·임시저장 | 글쓰기 `/blog/write` 위 막대 | `POST /api/posts/drafts`, `PUT /api/posts/drafts/:draftId`, `GET /api/posts/drafts/count`, `GET /api/posts/drafts`, `GET/DELETE /api/posts/drafts/:id` | 1-1, 1-2, 1-4 |
-| 발행·수정 | 글쓰기 [발행] 창 | `GET /api/posts/publish-defaults`, `POST /api/posts/:id/publish`(카테고리·주제·공개 범위·태그·옵션), `GET /api/posts/:id` | 1-3 |
+| 발행·수정 | 글쓰기 [발행] 창 | `GET /api/posts/publish-defaults`, `POST /api/posts/:id/publish`(카테고리·주제·공개 범위·태그·옵션·대표 사진 `coverPhotoId`), `GET /api/posts/:id` | 1-3 |
 | 글 읽기 | 글 보기 `/blog/p/:id`, 내 블로그·남의 블로그 `/blog/me`·`/blog/u/:id` | `GET /api/posts/:id`, `GET /api/blogs/:userId`의 글 목록(카테고리별) | 8-4, 8-5 |
 | 글 관리 | 블로그 관리 > 글 관리 `/blog/manage/posts` | `GET /api/manage/posts?state=&category=&page=&field=&q=`, `PATCH /api/posts/bulk`, `PATCH /api/posts/:id`, `DELETE /api/posts` | 8-13 |
 | 페이지·공지·서식 | `/blog/manage/pages`·`notices`·`templates` | `GET/DELETE /api/manage/{pages\|notices\|templates}` | 8-13 |
@@ -114,12 +114,12 @@
 | --- | --- | --- | --- |
 | 회원가입·로그인·로그아웃 | 로그인 화면(Google 로그인 버튼, 프론트에서 추가 예정), 오른쪽 위 로그아웃 버튼 | Google OAuth: 로그인 시작(Google로 보내기)·콜백(코드 교환→사용자 조회·생성→세션 쿠키) API 설계, `GET /api/me`(로그인 사용자·테마), `PATCH /api/me { theme }`, `DELETE /api/session` | 0, 5, 9 |
 | 인증·권한 확인 | 모든 API | 서명된 세션 쿠키, 요청마다 사용자 확인(비로그인 401), 블로그 주인 확인(남이면 403, 남의 비공개 글은 404). 로그인 미들웨어는 사용자 id를 `res.locals.userId`에 넣고, 모든 API는 이 값만 쓴다(2026-11-25 결정, 요청 본문·주소의 id로 본인을 판단하지 않는다). auth 병합 전에는 각 담당자가 임시 id로 개발한다 | 0 |
-| 댓글 | 글 보기·피드의 댓글, 휴대폰 댓글 시트 | `GET/POST /api/posts/:id/comments`, `PATCH/DELETE /api/comments/:id`, `POST/DELETE /api/comments/:id/like` | 8-3 |
+| 댓글 | 글 보기·피드의 댓글, 휴대폰 댓글 시트, 댓글 모음 `/blog/me/comments` | `GET/POST /api/posts/:id/comments`, `PATCH/DELETE /api/comments/:id`, `POST/DELETE /api/comments/:id/like`, `GET /api/me/comments`(내 글에 달린 댓글) | 8-3, 8-5 |
 | 댓글 관리 | 블로그 관리 > 댓글·방명록·휴지통 | `GET /api/manage/comments?kind=comment\|guestbook&trash=&view=&q=`, `POST /api/manage/comments/trash`, `POST …/restore`, `DELETE …/comments` | 8-13 |
-| 댓글 설정·스팸 | 블로그 관리 > 댓글·방명록 설정, 설정 > 댓글·안부글 권한 | `PATCH /api/blog/settings { comments, commentAuth }`, `PUT /api/blog/spam-filters`(걸린 새 댓글은 휴지통) | 8-13, 8-15 |
+| 댓글 설정·스팸 | 블로그 관리 > 댓글·방명록 설정, 설정 > 댓글·안부글 권한 | `PATCH /api/blog/settings { comments }`(8-13 로그인 조건과 8-15 댓글·안부글 대상을 한 칸에, 2026-11-25), `PUT /api/blog/spam-filters`(걸린 새 댓글은 휴지통) | 8-13, 8-15 |
 | 신고 | 글 ⋯ 메뉴 [신고하기] | `POST /api/reports` | 8-2 |
-| 프로필 | 블로그 커버·홈편집 `/blog/me/edit`, 설정 > 블로그 정보 | `GET /api/blogs/:userId`(프로필 부분), `PATCH /api/blogs/me`, `PATCH /api/blog { title, nickname, intro, image }` | 8-5, 8-6, 8-13, 8-15 |
-| 권한 관리 | 블로그 관리 > 팀블로그, 설정 > 차단 설정·차단된 글목록 | `GET /api/blog/members`, `POST /api/blog/members/invite`, `PATCH /api/blog/members/:id { role }`, `GET /api/blog/blocked`, 차단 설정 `PATCH /api/blog/settings { block }` | 8-13, 8-15 |
+| 프로필 | 블로그 커버·홈편집 `/blog/me/edit`, 설정 > 블로그 정보 | `GET /api/blogs/:userId`(프로필 부분), `PATCH /api/blog { title, nickname, intro, image, icon, favicon, cover, phone, address, sections, defaultView }`(홈편집·블로그 설정·블로그 정보 모두 이 API 하나, 2026-11-25) | 8-5, 8-6, 8-13, 8-15 |
+| 권한 관리 | 블로그 관리 > 팀블로그, 설정 > 차단 설정·차단된 글목록 | `GET /api/blog/members`, `POST /api/blog/members/invite`, `PATCH /api/blog/members/:id { role }`, `GET /api/blog/blocked`, 차단 설정은 댓글 설정의 `comments.spamToTrash`와 스팸 필터(`body[]`=차단할 단어, `name[]`=차단할 사용자) | 8-13, 8-15 |
 
 - 제안 표: `users`, `sessions`, `comments`, `comment_likes`, `reports`, `blog_members`, `blocks`.
 
@@ -144,7 +144,7 @@
 | 검색 | `/blog/explore`, 위 막대 검색 | `GET /api/search?q=&topic=` | 8-9 | 최성원(2026-11-25) |
 | 공감·공유 | 글 ♡·보내기 | `POST/DELETE /api/posts/:id/like`, `POST /api/posts/:id/share` | 8-2 | 최성원(2026-11-25) |
 | 북마크 | 글 책갈피, `/blog/bookmarks` | `PUT/DELETE /api/bookmarks/:postId`, `GET /api/bookmarks` | 8-14 | 최성원(2026-11-25) |
-| 이웃 | `/blog/me/neighbors`, 설정 > 이웃 관리 | `GET /api/neighbors`, `POST/DELETE /api/neighbors/:userId`, `POST /api/neighbor-groups`, `GET /api/neighbors/requests` | 8-7, 8-15 | 최성원(2026-11-25) |
+| 이웃 | `/blog/me/neighbors`, 설정 > 이웃 관리 | `GET /api/neighbors`, `POST/DELETE /api/neighbors/:userId`, `GET/POST /api/neighbor-groups`, `PATCH /api/neighbors/:userId { groupId }`(그룹 이동), `GET /api/neighbors/requests` | 8-7, 8-15 | 최성원(2026-11-25) |
 | 알림 | `/blog/notice`, 위 막대 🔔, 블로그 홈 내 소식 | `GET/DELETE /api/notifications`, `DELETE /api/notifications/:id`, `POST /api/notifications/read`, `GET /api/me/activity` + 댓글·공감·이웃 신청 때 알림 만들기 | 8-9, 8-10 | 최성원(2026-11-25) |
 | 통계 | `/blog/me/stats`, 블로그 관리 홈·방문 통계·유입 경로 | `GET /api/stats`, `GET /api/stats/summary`, `GET /api/stats/inflow`, `GET /api/stats/referrers`, `POST /api/posts/:id/read`(조회 기록) | 8-4, 8-8, 8-13 | 최성원(2026-11-25) |
 | 블로그 꾸미기 설정 | 블로그 관리 > 사이드바·메뉴·나의 링크·모바일·플러그인·콘텐츠 설정, 설정 > 기본 서체·콘텐츠 공유 | `PUT /api/blog/sidebar`, `PUT /api/blog/menu`, `PUT /api/blog/links`, `PUT /api/blog/plugins/:id`, `PATCH /api/blog/settings { sidebar, mobile, contents, font, share, timezone }` | 8-13, 8-15 | 최성원(2026-11-25) |
@@ -157,7 +157,7 @@
 | Google OAuth 로그인 API와 로그인 화면 | 로그인 방식은 Google OAuth로 확정됐지만 문서에는 `GET /api/me`·`DELETE /api/session`만 있다. Google Cloud 콘솔의 OAuth 클라이언트(승인된 리디렉션 주소 등록), 로그인 시작·콜백 API, 로그인 화면이 필요하다. OAuth 클라이언트는 2026-11-25 팀장이 발급했다(Google Cloud 프로젝트 `blog-cms-515807`, 클라이언트 `blog-cms-local`, 리디렉션 `http://localhost:8787/api/auth/google/callback`, 테스트 사용자 3명). 값은 팀장이 DM으로 전달하고 각자 맨 위 `/.dev.vars`에 둔다 | API 박세웅, 로그인 화면 프론트(팀장) |
 | 공개 범위 문장 고치기 | 기준은 `button_action.md` 8-1절(2026-11-20 결정: 글마다 공개/비공개, 다른 사람은 공개 글만, 작성자는 모두)이다. 문서는 2026-11-25 8-1절 기준으로 고쳤다(blog-cms #37: 저장 값은 화면과 같은 소문자, 이웃공개·서로이웃공개는 이웃 기능 전까지 받지 않음). 피드·검색·이웃·남의 블로그 글 목록이 이 기준으로 공개 글을 보여 준다 | 정민성(글 권한) |
 | 글 종류(공지·서식·페이지) 저장 | 관리 메뉴 [글쓰기 ⌄]가 `/blog/write?type=notice\|template\|page`로 가지만 저장 형식이 없다 → `posts`에 종류 열 | 정민성 |
-| 기존 글 불러와 수정 | 글 관리 [수정]이 `/blog/write?id=`로 가지만 불러오기가 없다 → `GET /api/posts/:id` 응답을 편집기 형식으로 | 정민성(프론트 연결은 프론트) |
+| 기존 글 불러와 수정·삭제 | 글 관리 [수정]과 글 화면 ⋯ [수정하기]가 `/blog/write?id=`로 가지만 불러오기가 없다 → `GET /api/posts/:id?for=edit`(편집기 형식 + revision). 글 화면 ⋯ [삭제하기]는 `DELETE /api/posts { ids: [id] }`(8-4) | 정민성(프론트 연결은 프론트) |
 | 태그 목록·태그별 글 | 사이드바 태그 모듈, 태그 검색 → `GET /api/tags`, 태그로 글 찾기 | 정민성 |
 | 버려진 사진 정리 | 글에 묶이지 않은 사진을 하루 뒤 지우는 정리 작업 → Workers 예약 실행(Cron Triggers)으로 D1·R2 정리 | 정민성 |
 | 중복 저장 키 정리 | `idempotency_keys`를 24시간 뒤 지우는 정리 작업 | 공통 기반 담당(최성원) |
