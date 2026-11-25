@@ -169,7 +169,7 @@
 
 ### 이번 팀의 필수 실행 안내 — 처음 GitHub를 사용하는 팀원도 동일하게 적용
 
-**프론트 담당 @erka246000, @minhyeonhong086-maker(민현홍), @vscodereader는 아래 순서대로 반드시 작업한다.** 백엔드 담당 @PswHp, @minseongdeveloper, @vscodereader도 `front` 대신 `backend`를 기준으로 같은 절차를 따른다. `backend` 브랜치는 아직 없으며, 백엔드 첫 작업 전에 팀장이 최신 `main`에서 만든다.
+**프론트 담당 @erka246000, @minhyeonhong086-maker(민현홍), @vscodereader는 아래 순서대로 반드시 작업한다.** 백엔드 담당 @PswHp, @minseongdeveloper, @vscodereader도 `front` 대신 `backend`를 기준으로 같은 절차를 따른다. `backend` 브랜치와 백엔드 기능·세부 작업 브랜치는 팀장이 만들어 두었다(2026-11-25, 아래 "blog-cms 백엔드 브랜치"). 백엔드 담당자는 `backend`·기능 브랜치에 직접 올리지 않고, 맡은 세부 작업 브랜치에서 작업한다.
 
 - Git은 내 컴퓨터에서 코드 변경 이력을 관리하는 도구이고, GitHub는 팀이 코드를 공유하고 검토하는 사이트다. 브랜치는 작업 공간을 나누는 것이며, PR(Pull Request)은 내 변경 내용을 다른 브랜치에 합쳐 달라는 검토 요청이다. 커밋은 내 컴퓨터에 변경 이력을 기록하고, push는 그 커밋을 GitHub에 올리는 것이다. **push만 했다고 작업 완료나 병합이 된 것은 아니다.**
 - 개발할 저장소는 반드시 `Full-Stack-Team1` 조직 소유인지 확인하고, 그 저장소의 Code 메뉴에 표시된 실제 주소로 clone한다. 조직의 `.github`는 소개·공통규칙 저장소이며 제품 개발 저장소가 아니다. 제품 개발 저장소는 `Full-Stack-Team1/blog-cms`이고, 임의의 이름이나 개인 저장소 주소로 작업하지 않는다. 이미 올바른 저장소를 clone했다면 다시 받을 필요 없다.
@@ -224,6 +224,75 @@ main
     └── feat/backend-auth         # backend에서 분기한 인증 기능 브랜치
         └── feat/backend-auth-login         # 기능 브랜치에서 분기한 로그인 세부 작업
 ```
+
+#### blog-cms 백엔드 브랜치 (2026-11-25 팀장 생성)
+
+모두 최신 `main`과 같은 시점에서 만들었다. 담당은 4절 "백엔드 담당 영역과 구현 목록"을 따르고, "미정"은 담당이 정해진 뒤 시작한다. 세부 작업 브랜치에서 작업을 시작하기 전에 이슈를 만들고(이슈 1개 = 세부 작업 브랜치 1개 = PR 1개), 시작 직전에 부모 기능 브랜치의 최신 내용을 받아 온다. 목록에 없는 작업이 필요하면 같은 이름 규칙으로 세부 작업 브랜치를 추가한다.
+
+```text
+main
+└── backend                                  # 백엔드 통합(직접 push 금지)
+    ├── feat/backend-common                  # 공통 기반 — 담당 미정 · 가장 먼저
+    │   ├── feat/backend-common-setup        # /wrangler.jsonc, Express on Workers 뼈대, D1·R2 연결
+    │   ├── feat/backend-common-response     # 응답·오류 형식, zod 검증, 같은 출처·요청 수 제한
+    │   ├── feat/backend-common-idempotency  # Idempotency-Key, revision(If-Match), 키 정리 작업
+    │   └── feat/backend-common-api-types    # /api 폴더와 common.ts
+    ├── feat/backend-auth                    # 박세웅
+    │   ├── feat/backend-auth-google-login   # Google OAuth 시작·콜백, 사용자 생성, 세션 쿠키
+    │   ├── feat/backend-auth-me             # GET·PATCH /api/me, 로그아웃
+    │   └── feat/backend-auth-permission     # 로그인 확인 401·주인 확인 403·남의 비공개 404
+    ├── feat/backend-comment                 # 박세웅
+    │   ├── feat/backend-comment-crud        # 댓글 작성·수정·삭제·좋아요
+    │   ├── feat/backend-comment-manage      # 댓글·방명록 관리, 휴지통, 댓글 설정, 스팸 필터
+    │   └── feat/backend-comment-report      # 신고 접수와 처리
+    ├── feat/backend-profile                 # 박세웅
+    │   ├── feat/backend-profile-blog-info   # 프로필·홈편집·블로그 정보
+    │   └── feat/backend-profile-members     # 팀블로그 멤버·권한, 차단
+    ├── feat/backend-post                    # 정민성
+    │   ├── feat/backend-post-draft          # 자동저장·임시저장
+    │   ├── feat/backend-post-publish        # 발행·수정·글 읽기·공개 범위, 본문 저장·XSS
+    │   ├── feat/backend-post-manage         # 글 관리·일괄 변경, 페이지·공지·서식(글 종류)
+    │   └── feat/backend-post-tag            # 태그 저장, 태그 목록·태그별 글
+    ├── feat/backend-category                # 정민성
+    │   └── feat/backend-category-tree       # 카테고리 트리·순서·표시 설정
+    ├── feat/backend-media                   # 정민성
+    │   ├── feat/backend-media-upload        # 사진·파일 R2 업로드·다운로드
+    │   ├── feat/backend-media-edit          # 사진 편집 사본
+    │   └── feat/backend-media-cleanup       # 버려진 사진 정리(Cron Triggers)
+    ├── feat/backend-editor                  # 정민성
+    │   ├── feat/backend-editor-link-preview # 링크 카드 미리보기
+    │   ├── feat/backend-editor-place        # 장소 검색·지도 — 제공처 미정
+    │   └── feat/backend-editor-spellcheck   # 맞춤법 — 제공처 미정
+    ├── feat/backend-seo                     # 최성원
+    │   ├── feat/backend-seo-url             # 글 주소 규칙, 블로그 주소 설정
+    │   ├── feat/backend-seo-meta            # 글 페이지 메타 태그(og) 넣기
+    │   └── feat/backend-seo-sitemap-rss     # sitemap.xml·robots.txt·RSS
+    ├── feat/backend-perf                    # 최성원
+    │   ├── feat/backend-perf-index          # 스키마 검토, 목록·검색 인덱스
+    │   └── feat/backend-perf-cache          # API·R2·화면 캐싱
+    ├── feat/backend-feed                    # 담당 미정
+    │   ├── feat/backend-feed-home           # 홈 피드, 블로그 홈 목록, 이달의 블로그
+    │   └── feat/backend-feed-hide           # 피드 숨기기
+    ├── feat/backend-search                  # 담당 미정
+    │   └── feat/backend-search-posts        # 글 검색
+    ├── feat/backend-reaction                # 담당 미정
+    │   ├── feat/backend-reaction-like-share # 공감·공유
+    │   └── feat/backend-reaction-bookmark   # 북마크
+    ├── feat/backend-neighbor                # 담당 미정
+    │   └── feat/backend-neighbor-follow     # 이웃 추가·삭제, 그룹, 서로이웃 신청
+    ├── feat/backend-notification            # 담당 미정
+    │   ├── feat/backend-notification-list   # 알림 목록·읽음·삭제, 내 소식
+    │   └── feat/backend-notification-create # 댓글·공감·이웃 신청 때 알림 만들기
+    ├── feat/backend-stats                   # 담당 미정
+    │   ├── feat/backend-stats-collect       # 조회 기록
+    │   └── feat/backend-stats-report        # 방문 통계·유입 경로·요약
+    └── feat/backend-blog-setting            # 담당 미정
+        ├── feat/backend-blog-setting-decorate # 사이드바·메뉴·링크·플러그인·모바일·서체·공유 설정
+        └── feat/backend-blog-setting-reset  # 블로그 초기화
+```
+
+- 아직 정하지 않은 것이 있는 브랜치: 담당 미정 파트(위 "담당 미정"), 장소·맞춤법 제공처(`feat/backend-editor-place`·`-spellcheck`), Google OAuth 로컬·운영 테스트 방법(`feat/backend-auth-google-login`), 백엔드 폴더를 담당자별로 나눌지(보류), 운영 주소(도메인, `feat/backend-seo-*`).
+- 먼저 `feat/backend-common-setup`이 병합돼야 다른 세부 작업이 같은 뼈대 위에서 시작할 수 있다. 그 전에 시작하는 작업은 이슈에 그 사실을 적는다.
 
 - `front`와 `backend`는 최신 `main`에서 각각 만든 장기 유지 브랜치다. 해당 파트의 기능 브랜치는 최신 파트 브랜치에서, 세부 작업 브랜치는 최신 기능 브랜치에서 만든다.
 - 작업 전에 범위·범위 밖·확인 방법을 적은 이슈를 만든다. 이슈 하나당 작업 브랜치 하나와 PR 하나를 사용한다. 아래 작업 전 이슈 필수 규칙을 따른다.
