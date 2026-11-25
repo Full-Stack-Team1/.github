@@ -86,7 +86,7 @@
 - 기준 문서: `blog-cms`의 `/front/button_action.md`(버튼마다 지금 동작·서버 연결 시 할 일·API·검증·오류 문구). 아래 "절"은 이 문서의 절 번호다. 프론트 화면은 `/front/src/screens/…`, 더미 데이터는 `/front/src/dummy/…`에서 확인한다.
 - `button_action.md`의 0절 "스택"과 0-2절 표는 2026-11-25 D1(SQLite) 기준으로 고쳤다(blog-cms #28). **구현은 1절 "확정 기술 스택"(Express on Workers + D1)을 따른다.** API 주소·요청·응답 모양은 그대로 따른다.
 - 각자 맡은 영역의 API·D1 표·마이그레이션·테스트를 만든다. 다른 사람 영역의 표·API를 바꿔야 하면 이슈에서 해당 담당자와 먼저 범위를 정한다. 여러 영역이 함께 쓰는 표(예: 글·댓글이 참조하는 사용자 표)는 이슈에 연결 관계를 적고 관련 담당자 모두에게 검토를 요청한다.
-- 구현 순서: ① 로그인·사용자(박세웅)와 공통 기반이 먼저 있어야 다른 API가 "누가 요청했는지"를 안다 → ② 글·카테고리·첨부(정민성), 댓글(박세웅) → ③ 목록·검색·통계·캐싱·SEO(최성원 및 미정 파트).
+- 구현 순서: ① 로그인·사용자(박세웅)와 공통 기반이 먼저 있어야 다른 API가 "누가 요청했는지"를 안다 → ② 글·카테고리·첨부(정민성), 댓글(박세웅) → ③ 목록·검색·통계·캐싱·SEO(최성원).
 - 아래 표 이름은 제안이다. 최종 이름·열은 담당자가 설계하고 최성원이 스키마를 검토한다.
 
 #### 정민성 — 콘텐츠 관리
@@ -103,7 +103,7 @@
 | 본문 저장·보안 | 글쓰기 전체 | 블록 JSON 저장, 검색용 `plain_text` 추출, 본문 HTML 허용 태그만 남기기(XSS) | 0, 0-1 |
 | 사진·파일(R2) | 글쓰기 사진·파일·사진 편집 | `POST /api/media/images`, `POST /api/media/images/:id/edit`, `GET /api/media/:id`, `POST /api/media/files`, `GET /api/media/:id/download` | 3-1, 3-2, 3-5 |
 | 링크 카드 | 글쓰기 1행 "링크" | `POST /api/link-preview`(내부망 주소 차단·리다이렉트 3회·5초·64KB 제한) | 2-7 |
-| 장소 | 글쓰기 1행 "장소" | `GET /api/places/search?q=`, `GET /api/places/static-map?lat=&lng=`(지도 제공처는 팀 결정 필요) | 2-9 |
+| 장소 | 글쓰기 1행 "장소" | `GET /api/places/search?q=`, `GET /api/places/static-map?lat=&lng=`(제공처는 네이버·구글 두 곳, 2026-11-25 팀장 결정. 하루길처럼 사용자가 제공처를 고르고, 각 회사 결과는 그 회사 지도에만 표시. 글 속 지도를 이미지로 할지 움직이는 지도로 할지는 미정) | 2-9 |
 | 맞춤법 | 글쓰기 맞춤법 막대 | `POST /api/spellcheck`(맞춤법 제공처는 팀 결정 필요) | 2-3 |
 
 - 제안 표: `posts`, `categories`, `post_tags`, `media`. 임시저장은 별도 표 없이 `posts`의 `status='DRAFT'` 행으로 저장한다(2026-11-25 결정, `post_drafts` 표는 만들지 않는다). 이미 발행한 글을 고치는 흐름은 `feat/backend-post-publish`에서 정한다.
@@ -154,8 +154,8 @@
 
 | 할 일 | 이유 | 담당 |
 | --- | --- | --- |
-| Google OAuth 로그인 API와 로그인 화면 | 로그인 방식은 Google OAuth로 확정됐지만 문서에는 `GET /api/me`·`DELETE /api/session`만 있다. Google Cloud 콘솔의 OAuth 클라이언트(승인된 리디렉션 주소 등록), 로그인 시작·콜백 API, 로그인 화면이 필요하다 | API 박세웅, 로그인 화면 프론트(팀장), OAuth 클라이언트 발급은 팀장 |
-| 공개 범위 문장 고치기 | 기준은 `button_action.md` 8-1절(2026-11-20 결정: 글마다 공개/비공개, 다른 사람은 공개 글만, 작성자는 모두)이다. 0절 "모든 글은 작성자 본인만"과 1-3절 "비공개만 발행"은 그 전(11-19) 문장이라 8-1절에 맞게 고친다. 피드·검색·이웃·남의 블로그 글 목록이 이 기준으로 공개 글을 보여 준다 | 정민성(글 권한), 문서 수정은 팀장 |
+| Google OAuth 로그인 API와 로그인 화면 | 로그인 방식은 Google OAuth로 확정됐지만 문서에는 `GET /api/me`·`DELETE /api/session`만 있다. Google Cloud 콘솔의 OAuth 클라이언트(승인된 리디렉션 주소 등록), 로그인 시작·콜백 API, 로그인 화면이 필요하다. OAuth 클라이언트는 2026-11-25 팀장이 발급했다(Google Cloud 프로젝트 `blog-cms-515807`, 클라이언트 `blog-cms-local`, 리디렉션 `http://localhost:8787/api/auth/google/callback`, 테스트 사용자 3명). 값은 팀장이 DM으로 전달하고 각자 맨 위 `/.dev.vars`에 둔다 | API 박세웅, 로그인 화면 프론트(팀장) |
+| 공개 범위 문장 고치기 | 기준은 `button_action.md` 8-1절(2026-11-20 결정: 글마다 공개/비공개, 다른 사람은 공개 글만, 작성자는 모두)이다. 문서는 2026-11-25 8-1절 기준으로 고쳤다(blog-cms #37: 저장 값은 화면과 같은 소문자, 이웃공개·서로이웃공개는 이웃 기능 전까지 받지 않음). 피드·검색·이웃·남의 블로그 글 목록이 이 기준으로 공개 글을 보여 준다 | 정민성(글 권한) |
 | 글 종류(공지·서식·페이지) 저장 | 관리 메뉴 [글쓰기 ⌄]가 `/blog/write?type=notice\|template\|page`로 가지만 저장 형식이 없다 → `posts`에 종류 열 | 정민성 |
 | 기존 글 불러와 수정 | 글 관리 [수정]이 `/blog/write?id=`로 가지만 불러오기가 없다 → `GET /api/posts/:id` 응답을 편집기 형식으로 | 정민성(프론트 연결은 프론트) |
 | 태그 목록·태그별 글 | 사이드바 태그 모듈, 태그 검색 → `GET /api/tags`, 태그로 글 찾기 | 정민성 |
@@ -261,7 +261,7 @@ main
     │   └── feat/backend-media-cleanup       # 버려진 사진 정리(Cron Triggers)
     ├── feat/backend-editor                  # 정민성
     │   ├── feat/backend-editor-link-preview # 링크 카드 미리보기
-    │   ├── feat/backend-editor-place        # 장소 검색·지도 — 제공처 미정
+    │   ├── feat/backend-editor-place        # 장소 검색·지도 — 네이버·구글
     │   └── feat/backend-editor-spellcheck   # 맞춤법 — 제공처 미정
     ├── feat/backend-seo                     # 최성원
     │   ├── feat/backend-seo-url             # 글 주소 규칙, 블로그 주소 설정
@@ -291,7 +291,7 @@ main
         └── feat/backend-blog-setting-reset  # 블로그 초기화
 ```
 
-- 아직 정하지 않은 것이 있는 브랜치: 장소·맞춤법 제공처(`feat/backend-editor-place`·`-spellcheck`), Google OAuth 로컬·운영 테스트 방법(`feat/backend-auth-google-login`), 백엔드 폴더를 담당자별로 나눌지(보류), 운영 주소(도메인, `feat/backend-seo-*`).
+- 아직 정하지 않은 것이 있는 브랜치: 맞춤법 제공처(`feat/backend-editor-spellcheck`), 글 속 장소 지도 방식(`feat/backend-editor-place`, 이미지 또는 움직이는 지도), Google OAuth 운영 테스트 방법(`feat/backend-auth-google-login`, 로컬은 위 OAuth 클라이언트로 정해짐), 백엔드 폴더를 담당자별로 나눌지(보류), 운영 주소(도메인, `feat/backend-seo-*`).
 - 공통 뼈대(`feat/backend-common-setup`)는 2026-11-25 `backend`에 병합됐다(이슈 #20, PR #21·#22). 각 세부 작업은 `backend`를 받아 이 뼈대 위에서 시작한다.
 
 - `front`와 `backend`는 최신 `main`에서 각각 만든 장기 유지 브랜치다. 해당 파트의 기능 브랜치는 최신 파트 브랜치에서, 세부 작업 브랜치는 최신 기능 브랜치에서 만든다.
