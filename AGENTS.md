@@ -106,14 +106,14 @@
 | 장소 | 글쓰기 1행 "장소" | `GET /api/places/search?q=`, `GET /api/places/static-map?lat=&lng=`(지도 제공처는 팀 결정 필요) | 2-9 |
 | 맞춤법 | 글쓰기 맞춤법 막대 | `POST /api/spellcheck`(맞춤법 제공처는 팀 결정 필요) | 2-3 |
 
-- 제안 표: `posts`, `post_drafts`, `categories`, `post_tags`, `media`.
+- 제안 표: `posts`, `categories`, `post_tags`, `media`. 임시저장은 별도 표 없이 `posts`의 `status='DRAFT'` 행으로 저장한다(2026-11-25 결정, `post_drafts` 표는 만들지 않는다). 이미 발행한 글을 고치는 흐름은 `feat/backend-post-publish`에서 정한다.
 
 #### 박세웅 — 사용자·댓글
 
 | 기능 | 화면(주소) | API | 기준 절 |
 | --- | --- | --- | --- |
 | 회원가입·로그인·로그아웃 | 로그인 화면(Google 로그인 버튼, 프론트에서 추가 예정), 오른쪽 위 로그아웃 버튼 | Google OAuth: 로그인 시작(Google로 보내기)·콜백(코드 교환→사용자 조회·생성→세션 쿠키) API 설계, `GET /api/me`(로그인 사용자·테마), `PATCH /api/me { theme }`, `DELETE /api/session` | 0, 5, 9 |
-| 인증·권한 확인 | 모든 API | 서명된 세션 쿠키, 요청마다 사용자 확인(비로그인 401), 블로그 주인 확인(남이면 403, 남의 비공개 글은 404) | 0 |
+| 인증·권한 확인 | 모든 API | 서명된 세션 쿠키, 요청마다 사용자 확인(비로그인 401), 블로그 주인 확인(남이면 403, 남의 비공개 글은 404). 로그인 미들웨어는 사용자 id를 `res.locals.userId`에 넣고, 모든 API는 이 값만 쓴다(2026-11-25 결정, 요청 본문·주소의 id로 본인을 판단하지 않는다). auth 병합 전에는 각 담당자가 임시 id로 개발한다 | 0 |
 | 댓글 | 글 보기·피드의 댓글, 휴대폰 댓글 시트 | `GET/POST /api/posts/:id/comments`, `PATCH/DELETE /api/comments/:id`, `POST/DELETE /api/comments/:id/like` | 8-3 |
 | 댓글 관리 | 블로그 관리 > 댓글·방명록·휴지통 | `GET /api/manage/comments?kind=comment\|guestbook&trash=&view=&q=`, `POST /api/manage/comments/trash`, `POST …/restore`, `DELETE …/comments` | 8-13 |
 | 댓글 설정·스팸 | 블로그 관리 > 댓글·방명록 설정, 설정 > 댓글·안부글 권한 | `PATCH /api/blog/settings { comments, commentAuth }`, `PUT /api/blog/spam-filters`(걸린 새 댓글은 휴지통) | 8-13, 8-15 |
