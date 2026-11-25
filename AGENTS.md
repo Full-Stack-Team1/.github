@@ -41,7 +41,7 @@
 - MariaDB·MySQL·PostgreSQL 전용 문법(예: `AUTO_INCREMENT`, `ENUM`, `NOW()`)으로 작성하지 않는다. AI에게 작업을 맡길 때도 "Cloudflare D1(SQLite)"이라고 밝힌다.
 - Workers에서는 서버 컴퓨터의 파일 시스템에 파일을 저장할 수 없다. 업로드 파일은 R2로 보낸다.
 - API 요청·응답 모양은 `/api/`의 TypeScript 타입으로 정하고 프론트와 백엔드가 같은 타입을 가져다 쓴다. `/api/`에는 타입만 두고 실행 코드·비밀 값을 두지 않는다. 타입을 바꾸는 PR은 그 타입을 쓰는 프론트·백엔드 담당자 모두에게 검토를 요청한다.
-- 아직 정하지 않은 것: 백엔드 폴더 분리(보류), 4절 "백엔드 아직 정해지지 않은 파트 분배"의 담당자. 정해지기 전에는 임의로 확정하지 않는다.
+- 아직 정하지 않은 것: 백엔드 폴더 분리(보류). 정해지기 전에는 임의로 확정하지 않는다.
 
 ## 2. 일하는 순서
 
@@ -135,20 +135,20 @@
 
 #### 백엔드 아직 정해지지 않은 파트 분배
 
-아래는 화면과 API는 있지만 위 세 영역 어디에도 딱 맞지 않아 담당자가 정해지지 않았다. 팀장이 나눠 이 표의 "담당" 칸을 채운다. 정해지기 전에는 이슈에서 담당을 먼저 정하고 시작한다.
+아래는 화면과 API는 있지만 위 세 영역 어디에도 딱 맞지 않던 기능이다. 2026-11-25 팀장 결정으로 공통 기반을 포함해 모두 최성원이 맡는다.
 
 | 기능 | 화면(주소) | API | 기준 절 | 담당 |
 | --- | --- | --- | --- | --- |
 | 공통 기반 | 모든 API | 응답 형식 `{ data, revision }`·오류 `{ error, code }`, 같은 출처 확인(403)·요청 수 제한(429), `Idempotency-Key`(중복 저장 방지), `If-Match` revision(동시 수정 409), 입력 검증(zod) | 0 | 최성원(2026-11-25) |
-| 홈 피드·블로그 홈 목록 | `/blog`(휴대폰 피드·넓은 화면 블로그 홈), `/blog/monthly` | `GET /api/feed`, `POST /api/feed/hide`, `GET /api/home/featured`·`popular`·`hot-topics`·`monthly-blogs`·`recommended-blogs`·`focus` | 8-2, 8-10, 8-11 | 미정 |
-| 검색 | `/blog/explore`, 위 막대 검색 | `GET /api/search?q=&topic=` | 8-9 | 미정 |
-| 공감·공유 | 글 ♡·보내기 | `POST/DELETE /api/posts/:id/like`, `POST /api/posts/:id/share` | 8-2 | 미정 |
-| 북마크 | 글 책갈피, `/blog/bookmarks` | `PUT/DELETE /api/bookmarks/:postId`, `GET /api/bookmarks` | 8-14 | 미정 |
-| 이웃 | `/blog/me/neighbors`, 설정 > 이웃 관리 | `GET /api/neighbors`, `POST/DELETE /api/neighbors/:userId`, `POST /api/neighbor-groups`, `GET /api/neighbors/requests` | 8-7, 8-15 | 미정 |
-| 알림 | `/blog/notice`, 위 막대 🔔, 블로그 홈 내 소식 | `GET/DELETE /api/notifications`, `DELETE /api/notifications/:id`, `POST /api/notifications/read`, `GET /api/me/activity` + 댓글·공감·이웃 신청 때 알림 만들기 | 8-9, 8-10 | 미정 |
-| 통계 | `/blog/me/stats`, 블로그 관리 홈·방문 통계·유입 경로 | `GET /api/stats`, `GET /api/stats/summary`, `GET /api/stats/inflow`, `GET /api/stats/referrers`, `POST /api/posts/:id/read`(조회 기록) | 8-4, 8-8, 8-13 | 미정 |
-| 블로그 꾸미기 설정 | 블로그 관리 > 사이드바·메뉴·나의 링크·모바일·플러그인·콘텐츠 설정, 설정 > 기본 서체·콘텐츠 공유 | `PUT /api/blog/sidebar`, `PUT /api/blog/menu`, `PUT /api/blog/links`, `PUT /api/blog/plugins/:id`, `PATCH /api/blog/settings { sidebar, mobile, contents, font, share, timezone }` | 8-13, 8-15 | 미정 |
-| 블로그 초기화 | 설정 > 블로그 초기화 | `POST /api/blog/reset`(글·사진·동영상·댓글·카테고리·R2 파일 삭제, 재확인) — 여러 영역 표를 함께 지운다 | 8-15 | 미정 |
+| 홈 피드·블로그 홈 목록 | `/blog`(휴대폰 피드·넓은 화면 블로그 홈), `/blog/monthly` | `GET /api/feed`, `POST /api/feed/hide`, `GET /api/home/featured`·`popular`·`hot-topics`·`monthly-blogs`·`recommended-blogs`·`focus` | 8-2, 8-10, 8-11 | 최성원(2026-11-25) |
+| 검색 | `/blog/explore`, 위 막대 검색 | `GET /api/search?q=&topic=` | 8-9 | 최성원(2026-11-25) |
+| 공감·공유 | 글 ♡·보내기 | `POST/DELETE /api/posts/:id/like`, `POST /api/posts/:id/share` | 8-2 | 최성원(2026-11-25) |
+| 북마크 | 글 책갈피, `/blog/bookmarks` | `PUT/DELETE /api/bookmarks/:postId`, `GET /api/bookmarks` | 8-14 | 최성원(2026-11-25) |
+| 이웃 | `/blog/me/neighbors`, 설정 > 이웃 관리 | `GET /api/neighbors`, `POST/DELETE /api/neighbors/:userId`, `POST /api/neighbor-groups`, `GET /api/neighbors/requests` | 8-7, 8-15 | 최성원(2026-11-25) |
+| 알림 | `/blog/notice`, 위 막대 🔔, 블로그 홈 내 소식 | `GET/DELETE /api/notifications`, `DELETE /api/notifications/:id`, `POST /api/notifications/read`, `GET /api/me/activity` + 댓글·공감·이웃 신청 때 알림 만들기 | 8-9, 8-10 | 최성원(2026-11-25) |
+| 통계 | `/blog/me/stats`, 블로그 관리 홈·방문 통계·유입 경로 | `GET /api/stats`, `GET /api/stats/summary`, `GET /api/stats/inflow`, `GET /api/stats/referrers`, `POST /api/posts/:id/read`(조회 기록) | 8-4, 8-8, 8-13 | 최성원(2026-11-25) |
+| 블로그 꾸미기 설정 | 블로그 관리 > 사이드바·메뉴·나의 링크·모바일·플러그인·콘텐츠 설정, 설정 > 기본 서체·콘텐츠 공유 | `PUT /api/blog/sidebar`, `PUT /api/blog/menu`, `PUT /api/blog/links`, `PUT /api/blog/plugins/:id`, `PATCH /api/blog/settings { sidebar, mobile, contents, font, share, timezone }` | 8-13, 8-15 | 최성원(2026-11-25) |
+| 블로그 초기화 | 설정 > 블로그 초기화 | `POST /api/blog/reset`(글·사진·동영상·댓글·카테고리·R2 파일 삭제, 재확인) — 여러 영역 표를 함께 지운다 | 8-15 | 최성원(2026-11-25) |
 
 #### 화면에는 있지만 `button_action.md`에 API가 없어 추가로 구현해야 하는 것
 
@@ -270,28 +270,28 @@ main
     ├── feat/backend-perf                    # 최성원
     │   ├── feat/backend-perf-index          # 스키마 검토, 목록·검색 인덱스
     │   └── feat/backend-perf-cache          # API·R2·화면 캐싱
-    ├── feat/backend-feed                    # 담당 미정
+    ├── feat/backend-feed                    # 최성원
     │   ├── feat/backend-feed-home           # 홈 피드, 블로그 홈 목록, 이달의 블로그
     │   └── feat/backend-feed-hide           # 피드 숨기기
-    ├── feat/backend-search                  # 담당 미정
+    ├── feat/backend-search                  # 최성원
     │   └── feat/backend-search-posts        # 글 검색
-    ├── feat/backend-reaction                # 담당 미정
+    ├── feat/backend-reaction                # 최성원
     │   ├── feat/backend-reaction-like-share # 공감·공유
     │   └── feat/backend-reaction-bookmark   # 북마크
-    ├── feat/backend-neighbor                # 담당 미정
+    ├── feat/backend-neighbor                # 최성원
     │   └── feat/backend-neighbor-follow     # 이웃 추가·삭제, 그룹, 서로이웃 신청
-    ├── feat/backend-notification            # 담당 미정
+    ├── feat/backend-notification            # 최성원
     │   ├── feat/backend-notification-list   # 알림 목록·읽음·삭제, 내 소식
     │   └── feat/backend-notification-create # 댓글·공감·이웃 신청 때 알림 만들기
-    ├── feat/backend-stats                   # 담당 미정
+    ├── feat/backend-stats                   # 최성원
     │   ├── feat/backend-stats-collect       # 조회 기록
     │   └── feat/backend-stats-report        # 방문 통계·유입 경로·요약
-    └── feat/backend-blog-setting            # 담당 미정
+    └── feat/backend-blog-setting            # 최성원
         ├── feat/backend-blog-setting-decorate # 사이드바·메뉴·링크·플러그인·모바일·서체·공유 설정
         └── feat/backend-blog-setting-reset  # 블로그 초기화
 ```
 
-- 아직 정하지 않은 것이 있는 브랜치: 담당 미정 파트(위 "담당 미정"), 장소·맞춤법 제공처(`feat/backend-editor-place`·`-spellcheck`), Google OAuth 로컬·운영 테스트 방법(`feat/backend-auth-google-login`), 백엔드 폴더를 담당자별로 나눌지(보류), 운영 주소(도메인, `feat/backend-seo-*`).
+- 아직 정하지 않은 것이 있는 브랜치: 장소·맞춤법 제공처(`feat/backend-editor-place`·`-spellcheck`), Google OAuth 로컬·운영 테스트 방법(`feat/backend-auth-google-login`), 백엔드 폴더를 담당자별로 나눌지(보류), 운영 주소(도메인, `feat/backend-seo-*`).
 - 공통 뼈대(`feat/backend-common-setup`)는 2026-11-25 `backend`에 병합됐다(이슈 #20, PR #21·#22). 각 세부 작업은 `backend`를 받아 이 뼈대 위에서 시작한다.
 
 - `front`와 `backend`는 최신 `main`에서 각각 만든 장기 유지 브랜치다. 해당 파트의 기능 브랜치는 최신 파트 브랜치에서, 세부 작업 브랜치는 최신 기능 브랜치에서 만든다.
